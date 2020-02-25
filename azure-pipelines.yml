@@ -1,0 +1,52 @@
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - develop    
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildCounter: $[counter('seed', 0)]
+
+steps:
+
+- task: PowerShell@2
+  displayName: 'Set build number'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $v = [string](Get-Content package.json | ConvertFrom-Json).version
+      Write-Host "##vso[build.updatebuildnumber]$v-$(Build.SourceBranchName).$(buildCounter)"
+
+- task: CmdLine@2
+  displayName: 'Install dependencies'
+  inputs:
+    script: 'yarn install'    
+
+- task: CmdLine@2
+  displayName: 'Build'
+  inputs:
+    script: 'yarn build'    
+    
+- task: PowerShell@2
+  displayName: 'Set package.json version'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $json = Get-Content package.json | ConvertFrom-Json
+      $json.version = "$($json.version)-$(Build.SourceBranchName).$(buildCounter)"
+      (ConvertTo-Json $json) > package.json
+
+- task: Npm@1
+  displayName: 'Publish npm package'
+  inputs:
+    command: 'custom'    
+    customCommand: 'publish --tag $(Build.SourceBranchName)'
+    customRegistry: 'useFeed'
+    customFeed: '7cc4d38f-2e0f-42df-a448-8e7b7482ea39'
