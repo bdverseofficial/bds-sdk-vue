@@ -1,3 +1,8 @@
+/*
+   API Service
+   The API service is used to low level interface with bds Server
+*/
+
 import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ConfigService } from './configService';
 import { LoadingService } from './loadingService';
