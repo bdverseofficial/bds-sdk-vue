@@ -3,6 +3,7 @@ import { Reference } from './Reference';
 import { BdsObject } from './BdsObject';
 
 export interface Country extends BdsEntity {
+    name: string;
     isoCode3: string;
     phoneExtension: number;
     phoneExtensionName: string;
