@@ -71,7 +71,7 @@ export class BdsApp {
         this.loadingService = new LoadingService();
         this.errorService = new ErrorService(options.error);
         this.apiService = new ApiService(this.configService, this.loadingService, this.authService, this.errorService, options.api);
-        this.profileService = new ProfileService(this.apiService, options.profile);
+        this.profileService = new ProfileService(this.apiService, this.configService, options.profile);
         this.routerService = new RouterService(this.authService, this.profileService, options.router);
         this.translationService = new TranslationService(this.apiService, this.configService, options.translation);
         this.bdsService = new BdsService(this.configService, this.apiService, options.bds);
@@ -120,6 +120,7 @@ export class BdsApp {
         await this.configService.init();
         await this.translationService.init();
         await this.apiService.init();
+        await this.profileService.init();
         await this.authService.init();
         await this.bdsService.init();
         await this.setLocale();

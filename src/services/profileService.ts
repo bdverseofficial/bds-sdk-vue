@@ -1,6 +1,7 @@
 import { ApiService, ApiRequestConfig } from './apiService';
 import { User, Phone, TwoFactorAuthentication } from '../models/User';
 import { ChallengedRequest } from './authService';
+import { ConfigService } from './configService';
 
 export interface ProfileOptions {
     appId?: string;
@@ -39,6 +40,7 @@ export interface ChangeMePasswordRequest extends ChallengedRequest {
 export class ProfileService {
 
     private apiService: ApiService;
+    private configService: ConfigService;
 
     public store: ProfileStore = {
         me: undefined,
@@ -49,11 +51,18 @@ export class ProfileService {
         onProfileChanged: () => Promise.resolve(),
     };
 
-    constructor(apiService: ApiService, options?: ProfileOptions) {
+    constructor(apiService: ApiService, configService: ConfigService, options?: ProfileOptions) {
         this.apiService = apiService;
+        this.configService = configService;
         if (options) {
             this.options.onProfileChanged = options.onProfileChanged || this.options.onProfileChanged;
             this.options.appId = options.appId || this.options.appId;
+        }
+    }
+
+    public async init(): Promise<void> {
+        if (!this.options.appId) {
+            this.options.appId = this.configService.configuration!.appId;
         }
     }
 
