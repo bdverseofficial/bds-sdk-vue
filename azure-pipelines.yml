@@ -12,8 +12,8 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  seed: 1
-  buildCounter: $[counter(variables['seed'], 56)]
+  seed: 2
+  buildCounter: $[counter(variables['seed'], 59)]
 
 steps:
 
