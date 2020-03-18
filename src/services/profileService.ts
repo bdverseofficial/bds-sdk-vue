@@ -70,10 +70,17 @@ export class ProfileService {
         if (this.store) {
             this.store.me = await this.getUserInfo();
             if (this.store.me && this.store.me.clientApplicationUserRoles) {
-                this.store.roles = this.store.me.clientApplicationUserRoles.filter(g => g.application && g.application.id === this.options.appId && g.role).map(g => g.role!);
+                this.store.roles = this.getUserRoles(this.store.me)!;
             }
             if (this.options.onProfileChanged) await this.options.onProfileChanged!();
         }
+    }
+
+    public getUserRoles(user: User): string[] | null {
+        if (user && user.clientApplicationUserRoles) {
+            return user.clientApplicationUserRoles.filter(g => g.application && g.application.id === this.options.appId && g.role).map(g => g.role!);
+        }
+        return null;
     }
 
     public async getUserInfo(options?: ApiRequestConfig): Promise<User> {
@@ -149,6 +156,22 @@ export class ProfileService {
         if (this.store && this.store.roles) {
             if (this.store.roles.find(r => r === "SYSADMIN")) return true;
             if (this.store.roles.find(r => r === role)) return true;
+        }
+        return false;
+    }
+
+    public isInOneOfRolesForUser(user: User, roles: string[]): boolean {
+        if (user) {
+            return roles.filter(r => this.isInRoleForUser(user, r)).length > 0;
+        }
+        return false;
+    }
+
+    public isInRoleForUser(user: User, role: string): boolean {
+        let assignedroles = this.getUserRoles(user)!;
+        if (assignedroles) {
+            if (assignedroles.find(r => r === "SYSADMIN")) return true;
+            if (assignedroles.find(r => r === role)) return true;
         }
         return false;
     }

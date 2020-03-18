@@ -68,7 +68,7 @@ export class RouterService {
         });
         this.router.beforeEach((to, from, next) => {
             if (this.escapeRoute(to)) {
-                next({ name: to.name, hash: to.hash, params: to.params, query: to.query, path: to.path });
+                next({ name: to.name!, hash: to.hash, params: to.params, query: to.query!, path: to.path });
             }
             let route = to.matched.find(e => e.meta.auth);
             if (route) {
