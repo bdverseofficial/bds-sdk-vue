@@ -139,7 +139,8 @@ export class RouterService {
                     }
                     if (roles) {
                         if (!this.profileService.isInOneOfRoles(roles)) {
-                            initialRoute.next({ path: this.options.homePage });
+                            initialRoute.next({ path: this.options.loginPage, query: { url: initialRoute.to.fullPath } });
+                            return;
                         }
                     }
                 }
