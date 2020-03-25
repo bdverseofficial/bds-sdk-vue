@@ -130,6 +130,7 @@ export class RouterService {
             let meta = to.matched.reduce((total: any, route: RouteRecord) => {
                 if (!total && !route.meta) return null;
                 if (!total) return route.meta;
+                if (!route.meta) return total;
                 return { ...total, ...route.meta };
             }, null);
             return meta;
