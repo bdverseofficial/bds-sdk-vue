@@ -18,7 +18,7 @@ export interface RouterOptions {
 
 interface InitialRoute {
     to: Route;
-    from: RouteRecord;
+    from: Route;
     next: (to?: RawLocation | false | ((vm: Vue) => any) | void) => void;
 }
 
@@ -70,10 +70,7 @@ export class RouterService {
             if (this.escapeRoute(to)) {
                 next({ name: to.name!, hash: to.hash, params: to.params, query: to.query!, path: to.path });
             }
-            let route = to.matched.find(e => e.meta.auth);
-            if (route) {
-                this.manageAuthGuard({ to: to, from: route, next: next });
-            } else next();
+            this.manageAuthGuard({ to: to, from: from, next: next });
         });
     }
 
@@ -117,30 +114,46 @@ export class RouterService {
     }
 
     public redirectToLoginIfNeeded() {
-        if (this.router && this.router.currentRoute && this.router.currentRoute.meta) {
-            let auth = this.router.currentRoute.meta.auth;
-            if (auth && this.authService) {
-                if (!this.authService.store.isAuthenticated) {
-                    this.login(this.router.currentRoute.fullPath);
+        if (this.router && this.router.currentRoute) {
+            let meta = this.getMeta(this.router.currentRoute);
+            if (meta) {
+                let auth = meta.auth;
+                if (auth) {
+                    this.home();
                 }
             }
         }
     }
 
+    private getMeta(to: Route) {
+        if (to && to.matched) {
+            let meta = to.matched.reduce((total: any, route: RouteRecord) => {
+                if (!total && !route.meta) return null;
+                if (!total) return route.meta;
+                return { ...total, ...route.meta };
+            }, null);
+            return meta;
+        }
+        return null;
+    }
+
     private manageAuthGuard(initialRoute: InitialRoute) {
         if (!this.pause) {
-            if (initialRoute.from && initialRoute.from.meta) {
-                let auth = initialRoute.from.meta.auth;
-                let roles = initialRoute.from.meta.roles;
-                if (auth && this.authService) {
-                    if (!this.authService.store.isAuthenticated) {
-                        initialRoute.next({ path: this.options.loginPage, query: { url: initialRoute.to.fullPath } });
-                        return;
-                    }
-                    if (roles) {
-                        if (!this.profileService.isInOneOfRoles(roles)) {
+            if (initialRoute.to && initialRoute.to.matched) {
+                let meta = this.getMeta(initialRoute.to);
+                if (meta) {
+                    let auth = meta.auth;
+                    let roles = meta.roles;
+                    if (auth && this.authService) {
+                        if (!this.authService.store.isAuthenticated) {
                             initialRoute.next({ path: this.options.loginPage, query: { url: initialRoute.to.fullPath } });
                             return;
+                        }
+                        if (roles) {
+                            if (!this.profileService.isInOneOfRoles(roles)) {
+                                initialRoute.next({ path: this.options.loginPage, query: { url: initialRoute.to.fullPath } });
+                                return;
+                            }
                         }
                     }
                 }
