@@ -54,6 +54,7 @@ export type BdsStore = bdsStore;
 import { Reference as reference } from './models/Reference';
 import { UserEvent as userEvent } from './models/UserEvent';
 import { BdsObject as bdsObject } from './models/BdsObject';
+import { Asset as asset } from './models/Asset';
 import { BdsEntity as bdsEntity, BdsMeta as bdsMeta } from './models/BdsEntity';
 import { User as user, Country as country, GeoLocation as geoLocation, Address as address, Phone as phone, TwoFactorAuthentication as twoFactorAuthentication, ClientApplicationUserRole as clientApplicationUserRole } from './models/User';
 
@@ -62,6 +63,7 @@ export type UserEvent = userEvent;
 export type BdsObject = bdsObject;
 export type BdsEntity = bdsEntity;
 export type BdsMeta = bdsMeta;
+export type Asset = asset;
 export type Address = address;
 export type GeoLocation = geoLocation;
 export type User = user;

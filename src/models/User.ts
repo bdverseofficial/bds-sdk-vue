@@ -1,6 +1,7 @@
 import { BdsEntity } from './BdsEntity';
 import { Reference } from './Reference';
 import { BdsObject } from './BdsObject';
+import { Asset } from './Asset';
 
 export interface Country extends BdsEntity {
     name: string;
@@ -60,4 +61,6 @@ export interface User extends BdsEntity {
     phone?: Phone;
     clientApplicationUserRoles?: ClientApplicationUserRole[];
     identityProvider?: string;
+    avatar?: Reference;
+    fullAvatar?: Asset;
 }
