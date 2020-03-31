@@ -2,6 +2,7 @@ import { ApiService, ApiRequestConfig } from './apiService';
 import { User, Phone, TwoFactorAuthentication } from '../models/User';
 import { ChallengedRequest } from './authService';
 import { ConfigService } from './configService';
+import { Asset } from '@/models/Asset';
 
 export interface ProfileOptions {
     appId?: string;
@@ -90,6 +91,16 @@ export class ProfileService {
 
     public async updateUserInfo(user: User, options?: ApiRequestConfig): Promise<User | undefined> {
         let response = await this.apiService.post('api/bds/v1/users/me', user, options);
+        if (response.data) {
+            this.store!.me = response.data;
+            if (this.options.onProfileChanged) await this.options.onProfileChanged!();
+            return response.data;
+        }
+        return undefined;
+    }
+
+    public async updateAvatar(asset: Asset, options?: ApiRequestConfig): Promise<User | undefined> {
+        let response = await this.apiService.post('api/bds/v1/users/me/avatar', asset, options);
         if (response.data) {
             this.store!.me = response.data;
             if (this.options.onProfileChanged) await this.options.onProfileChanged!();
