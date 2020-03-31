@@ -2,7 +2,7 @@ import { ApiService, ApiRequestConfig } from './apiService';
 import { User, Phone, TwoFactorAuthentication } from '../models/User';
 import { ChallengedRequest } from './authService';
 import { ConfigService } from './configService';
-import { Asset } from '@/models/Asset';
+import { Asset } from '../models/Asset';
 
 export interface ProfileOptions {
     appId?: string;
