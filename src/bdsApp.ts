@@ -93,9 +93,9 @@ export class BdsApp {
     }
 
     protected async onProfileChanged(): Promise<void> {
-        if (this.profileService.store.me && this.profileService.store.me.culture) {
-            await this.setLocale(this.profileService.store.me.culture.id);
-        }
+        // if (this.profileService.store.me && this.profileService.store.me.culture) {
+        //     await this.setLocale(this.profileService.store.me.culture.id);
+        // }
     }
 
     protected signInCompleted(): Promise<void> {
