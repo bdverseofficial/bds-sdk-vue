@@ -15,6 +15,7 @@ export interface Token {
     access_token?: string;
     identityProvider?: string;
     device_token?: string;
+    expires_in?: number;
 }
 
 export interface ChallengeMethod {
@@ -186,6 +187,9 @@ export class AuthService {
             this.refreshTimeout = undefined;
         }
         let timeSpan = this.configService.configuration!.refreshTokenTimeSpanSecond || 30000;
+        if (this.token && this.token.expires_in) {
+            timeSpan = (this.token.expires_in / 2) * 1000;
+        }
         this.refreshTimeout = window.setTimeout(async () => { await this.refreshToken(); }, timeSpan);
     }
 
