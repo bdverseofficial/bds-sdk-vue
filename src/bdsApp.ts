@@ -48,13 +48,8 @@ export class BdsApp {
             options.auth!.signInCompleted = () => this.signInCompleted();
             options.auth!.signOutCompleted = () => this.signOutCompleted();
         }
-        if (!options.api) options.api = {};
-        {
-            options.api.appId = options.appId;
-        }
         if (!options.profile) options.profile = {};
         {
-            options.profile.appId = options.appId;
             options.profile.onProfileChanged = () => this.onProfileChanged();
         }
         if (!options.error) options.error = {};

@@ -39,14 +39,14 @@ export class TranslationService {
     }
 
     public async init() {
-        let config = this.configService.configuration!;
-        this.options.locale = (this.options.locale || config.defaultLocale) || DEFAULTLOCALE;
-        this.options.fallbackLocale = (this.options.fallbackLocale || config.defaultLocale) || DEFAULTLOCALE;
-        this.options.supportedLocale = this.options.supportedLocale || config.supportedLocale;
-        this.options.supportedLocale = this.options.supportedLocale || (config.defaultLocale ? [config.defaultLocale!] : [DEFAULTLOCALE]);
+        let config = this.configService.configuration;
+        this.options.locale = (this.options.locale || config?.defaultLocale) || DEFAULTLOCALE;
+        this.options.fallbackLocale = (this.options.fallbackLocale || config?.defaultLocale) || DEFAULTLOCALE;
+        this.options.supportedLocale = this.options.supportedLocale || config?.supportedLocale;
+        this.options.supportedLocale = this.options.supportedLocale || (config?.defaultLocale ? [config.defaultLocale!] : [DEFAULTLOCALE]);
         this.i18n.fallbackLocale = this.options.fallbackLocale;
         if (this.options.fallbackLocale) {
-            await this.loadLang(this.options.fallbackLocale);
+            this.loadLang(this.options.fallbackLocale).catch(() => { });
         }
     }
 

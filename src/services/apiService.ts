@@ -15,7 +15,6 @@ export interface ApiRequestConfig extends AxiosRequestConfig {
 }
 
 export interface ApiOptions {
-    appId?: string;
     throwOnlyCustomError?: boolean;
     applyTranslation?: boolean;
 }
@@ -32,7 +31,6 @@ export class ApiService {
         this.configService = configService;
         authService.apiService = this;
         if (options) {
-            this.options.appId = options.appId || this.options.appId;
             this.options.throwOnlyCustomError = options.throwOnlyCustomError || this.options.throwOnlyCustomError;
             this.options.applyTranslation = options.applyTranslation || this.options.applyTranslation;
         }
@@ -71,9 +69,11 @@ export class ApiService {
                     customError = true;
                     userError = { userError, ...error.response.data };
                 } else {
-                    userError.errorCode = error.response.status || "";
-                    userError.errorMessage = error.response.statusText || "";
-                    userError.developerMessage = error.response.data || "";
+                    if (error.response) {
+                        userError.errorCode = error.response.status || "";
+                        userError.errorMessage = error.response.statusText || "";
+                        userError.developerMessage = error.response.data || "";
+                    }
                 }
                 if (customError || this.options.throwOnlyCustomError !== true) {
                     if (!error.config || !error.config.silentError) {
@@ -107,11 +107,8 @@ export class ApiService {
     }
 
     public async init() {
-        if (!this.options.appId) {
-            this.options.appId = this.configService.configuration!.appId;
-        }
-        this.httpService.defaults.baseURL = this.configService.configuration!.serverUrl;
-        this.httpService.defaults.headers.common['AppId'] = this.options.appId;
+        this.httpService.defaults.baseURL = this.configService.configuration?.serverUrl;
+        this.httpService.defaults.headers.common['AppId'] = this.configService.configuration?.appId;
         this.httpService.defaults.headers.common['DeviceId'] = await this.getDeviceId();
         if (this.options.applyTranslation) this.httpService.defaults.headers.common['translation'] = true;
     }

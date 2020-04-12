@@ -248,9 +248,9 @@ export class AuthService {
     }
 
     public async init(): Promise<void> {
-        this.challengeMethods = (await this.getChallengeMethods())!;
+        this.getChallengeMethods().then((value) => { this.challengeMethods = value!; }, (value) => { this.challengeMethods = [] }).catch(() => { });
         if (this.options.refreshOnInit) {
-            await this.TryAutoAuth();
+            this.TryAutoAuth().catch(() => { });
         }
     }
 
@@ -265,8 +265,8 @@ export class AuthService {
 
     public getHeaders(): any {
         let headers: any = {};
-        if (this.configService.configuration!.apiToken) {
-            headers['ApiToken'] = this.configService.configuration!.apiToken;
+        if (this.configService.configuration?.apiToken) {
+            headers['ApiToken'] = this.configService.configuration.apiToken;
         }
         return headers;
     }

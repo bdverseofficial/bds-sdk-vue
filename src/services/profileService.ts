@@ -5,7 +5,6 @@ import { ConfigService } from './configService';
 import { Asset } from '../models/Asset';
 
 export interface ProfileOptions {
-    appId?: string;
     getUserInfoApi?: () => Promise<any>;
     onProfileChanged?: () => Promise<void>;
 }
@@ -48,7 +47,6 @@ export class ProfileService {
     };
 
     private options: ProfileOptions = {
-        appId: "",
         onProfileChanged: () => Promise.resolve(),
     };
 
@@ -57,14 +55,10 @@ export class ProfileService {
         this.configService = configService;
         if (options) {
             this.options.onProfileChanged = options.onProfileChanged || this.options.onProfileChanged;
-            this.options.appId = options.appId || this.options.appId;
         }
     }
 
     public async init(): Promise<void> {
-        if (!this.options.appId) {
-            this.options.appId = this.configService.configuration!.appId;
-        }
     }
 
     public async getUserProfile(): Promise<void> {
@@ -79,7 +73,7 @@ export class ProfileService {
 
     public getUserRoles(user: User): string[] | null {
         if (user && user.clientApplicationUserRoles) {
-            return user.clientApplicationUserRoles.filter(g => g.application && g.application.id === this.options.appId && g.role).map(g => g.role!);
+            return user.clientApplicationUserRoles.filter(g => g.application && g.application.id === this.configService.configuration?.appId && g.role).map(g => g.role!);
         }
         return null;
     }
