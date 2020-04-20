@@ -52,7 +52,7 @@ export class ChatService {
         }
     }
 
-    public async startConnection(): Promise<HubConnection> {
+    private async startConnection(): Promise<HubConnection> {
         if (!this.connection) {
             this.connection = new HubConnectionBuilder().withUrl(this.configService.configuration!.serverUrl! + "hubs/chats?appId=" + this.configService.configuration?.appId).build();
             this.connection.onclose(() => this.internalStartConnection());
