@@ -46,8 +46,9 @@ export { ErrorService } from './services/errorService';
 export type ErrorOptions = errorOptions;
 export type BdsError = bdsError;
 
-import { SocUser as socUser, MessageBase as messageBase, BlogPost as blogPost, CalendarItem as calendarItem, MessageBaseGroup as messageBaseGroup, Channel as channel, Blog as blog, Message as message } from './models/Soc';
+import { Dictionary as dictionary, SocUser as socUser, MessageBase as messageBase, BlogPost as blogPost, CalendarItem as calendarItem, MessageBaseGroup as messageBaseGroup, Channel as channel, Blog as blog, Message as message } from './models/Soc';
 export type SocUser = socUser;
+export type Dictionary<T> = dictionary<T>;
 export type MessageBase = messageBase;
 export type BlogPost = blogPost;
 export type CalendarItem = calendarItem;
