@@ -9,9 +9,17 @@ import { LoadingService } from './services/loadingService';
 import { BdsOptions, BdsService } from './services/bdsService';
 import { TranslationOptions, TranslationService } from './services/translationService';
 import { LocaleMessageObject } from 'vue-i18n';
+import { CmsService, CmsOptions } from './services/cmsService';
+import { ChatService, ChatOptions } from './services/chatService';
+import { BlogOptions, BlogService } from './services/blogService';
+import { CalendarOptions, CalendarService } from './services/calendarService';
 
 export interface BdsAppOptions {
     config?: ConfigOptions;
+    chat?: ChatOptions;
+    blog?: BlogOptions;
+    calendar?: CalendarOptions;
+    cms?: CmsOptions;
     auth?: AuthOptions;
     error?: ErrorOptions;
     router?: RouterOptions;
@@ -33,6 +41,10 @@ export class BdsApp {
     public loadingService: LoadingService;
     public profileService: ProfileService;
     public routerService: RouterService;
+    public cmsService: CmsService;
+    public chatService: ChatService;
+    public blogService: BlogService;
+    public calendarService: CalendarService;
     public translationService: TranslationService;
 
     public title?: string;
@@ -69,6 +81,10 @@ export class BdsApp {
         this.profileService = new ProfileService(this.apiService, this.configService, options.profile);
         this.routerService = new RouterService(this.authService, this.profileService, options.router);
         this.translationService = new TranslationService(this.apiService, this.configService, options.translation);
+        this.cmsService = new CmsService(this.apiService, this.translationService, this.configService, options.cms);
+        this.chatService = new ChatService(this.apiService, this.configService, options.chat);
+        this.blogService = new BlogService(this.apiService, options.blog);
+        this.calendarService = new CalendarService(this.apiService, options.calendar);
         this.bdsService = new BdsService(this.configService, this.apiService, options.bds);
 
         this.title = options.title;
@@ -117,6 +133,7 @@ export class BdsApp {
         await this.apiService.init();
         await this.profileService.init();
         await this.authService.init();
+        await this.cmsService.init();
         await this.bdsService.init();
         await this.setLocale();
         this.ready = true;

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { CmsOptions } from './cmsService';
 
 export interface Configuration {
     appId?: string;
@@ -8,6 +9,7 @@ export interface Configuration {
     defaultLocale?: string;
     supportedLocale?: string[];
     userTypeName?: string;
+    cms?: CmsOptions;
 }
 
 export interface ConfigOptions {

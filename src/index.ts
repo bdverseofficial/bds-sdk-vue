@@ -46,6 +46,41 @@ export { ErrorService } from './services/errorService';
 export type ErrorOptions = errorOptions;
 export type BdsError = bdsError;
 
+import { SocUser as socUser, MessageBase as messageBase, BlogPost as blogPost, CalendarItem as calendarItem, MessageBaseGroup as messageBaseGroup, Channel as channel, Blog as blog, Message as message } from './models/soc';
+export type SocUser = socUser;
+export type MessageBase = messageBase;
+export type BlogPost = blogPost;
+export type CalendarItem = calendarItem;
+export type MessageBaseGroup = messageBaseGroup;
+export type Channel = channel;
+export type Blog = blog;
+export type Message = message;
+
+export { ChatService } from './services/chatService';
+import { ChatOptions as chatOptions, ChatStore as chatStore } from './services/chatService';
+export type ChatOptions = chatOptions;
+export type ChatStore = chatStore;
+
+export { BlogService } from './services/blogService';
+import { BlogOptions as blogOptions, BlogStore as blogStore } from './services/blogService';
+export type BlogOptions = blogOptions;
+export type BlogStore = blogStore;
+
+export { CalendarService } from './services/calendarService';
+import { CalendarOptions as calendarOptions, CalendarStore as calendarStore } from './services/calendarService';
+export type CalendarOptions = calendarOptions;
+export type CalendarStore = calendarStore;
+
+import { ContentType as contentType, Content as content, Source as source } from './models/cms';
+export type Content = content;
+export type Source = source;
+export type ContentType = contentType;
+
+import { CmsOptions as cmsOptions, CmsStore as cmsStore } from './services/cmsService';
+export { CmsService } from './services/cmsService';
+export type CmsOptions = cmsOptions;
+export type CmsStore = cmsStore;
+
 import { BdsOptions as bdsOptions, BdsStore as bdsStore } from './services/bdsService';
 export { BdsService } from './services/bdsService';
 export type BdsOptions = bdsOptions;
