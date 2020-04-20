@@ -26,10 +26,7 @@ export class ConfigService {
     public configuration?: Configuration;
 
     constructor(options?: ConfigOptions) {
-        if (options) {
-            this.options.configPath = options.configPath || this.options.configPath;
-            this.options.configuration = options.configuration || this.options.configuration;
-        }
+        this.options = { ...this.options, ...options };
     }
 
     public async init() {

@@ -53,9 +53,7 @@ export class ProfileService {
     constructor(apiService: ApiService, configService: ConfigService, options?: ProfileOptions) {
         this.apiService = apiService;
         this.configService = configService;
-        if (options) {
-            this.options.onProfileChanged = options.onProfileChanged || this.options.onProfileChanged;
-        }
+        this.options = { ...this.options, ...options };
     }
 
     public async init(): Promise<void> {

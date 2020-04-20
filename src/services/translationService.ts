@@ -27,12 +27,7 @@ export class TranslationService {
     constructor(apiService: ApiService, configService: ConfigService, options?: TranslationOptions) {
         this.configService = configService;
         this.apiService = apiService;
-        if (options) {
-            this.options.locale = options.locale || this.options.locale;
-            this.options.fallbackLocale = options.fallbackLocale || this.options.fallbackLocale;
-            this.options.supportedLocale = options.supportedLocale || this.options.supportedLocale;
-            this.options.getLang = options.getLang || this.options.getLang;
-        }
+        this.options = { ...this.options, ...options };
         this.i18n = new VueI18n({
             locale: '',
         });

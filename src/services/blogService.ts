@@ -19,7 +19,7 @@ export class BlogService {
 
     constructor(apiService: ApiService, options?: BlogOptions) {
         this.apiService = apiService;
-        this.options = options ? options : this.options;
+        this.options = { ...this.options, ...options };
     }
 
     async getBlogPosts(blogId: string, draft: boolean, limit: number, scrollId?: string, options?: ApiRequestConfig): Promise<BlogPost[] | null> {

@@ -16,9 +16,7 @@ export class ErrorService {
     };
 
     constructor(options?: ErrorOptions) {
-        if (options) {
-            this.options.errorHandler = options.errorHandler || this.options.errorHandler;
-        }
+        this.options = { ...this.options, ...options };
     }
 
     public error(context: string, error: BdsError): Promise<void> {

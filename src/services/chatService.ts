@@ -37,7 +37,7 @@ export class ChatService {
     constructor(apiService: ApiService, configService: ConfigService, options?: ChatOptions) {
         this.apiService = apiService;
         this.configService = configService;
-        this.options = options ? options : this.options;
+        this.options = { ...this.options, ...options };
         this.httpService = Axios.create();
     }
 

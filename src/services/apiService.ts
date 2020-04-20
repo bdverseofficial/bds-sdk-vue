@@ -30,11 +30,7 @@ export class ApiService {
     constructor(configService: ConfigService, loadingService: LoadingService, authService: AuthService, errorService: ErrorService, options?: ApiOptions) {
         this.configService = configService;
         authService.apiService = this;
-        if (options) {
-            this.options.throwOnlyCustomError = options.throwOnlyCustomError || this.options.throwOnlyCustomError;
-            this.options.applyTranslation = options.applyTranslation || this.options.applyTranslation;
-        }
-
+        this.options = { ...this.options, ...options };
         this.httpService = Axios.create();
 
         this.httpService.interceptors.request.use((config) => {

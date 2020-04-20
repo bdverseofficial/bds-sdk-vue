@@ -13,6 +13,7 @@ import { CmsService, CmsOptions } from './services/cmsService';
 import { ChatService, ChatOptions } from './services/chatService';
 import { BlogOptions, BlogService } from './services/blogService';
 import { CalendarOptions, CalendarService } from './services/calendarService';
+import { ContentType } from './models/Cms';
 
 export interface BdsAppOptions {
     config?: ConfigOptions;
@@ -64,6 +65,10 @@ export class BdsApp {
         {
             options.profile.onProfileChanged = () => this.onProfileChanged();
         }
+        if (!options.cms) options.cms = {};
+        {
+            options.cms.convertContent = (type: ContentType, content: string) => this.onConvertContent(type, content);
+        }
         if (!options.error) options.error = {};
         {
             options.error.errorHandler = (context: string, error: BdsError) => this.errorHandler(context, error);
@@ -101,6 +106,10 @@ export class BdsApp {
 
     protected getLang(lang: string): Promise<LocaleMessageObject | undefined> {
         return Promise.resolve(undefined);
+    }
+
+    protected onConvertContent(type: ContentType, content: string): string {
+        return content;
     }
 
     protected async onProfileChanged(): Promise<void> {

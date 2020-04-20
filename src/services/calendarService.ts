@@ -19,7 +19,7 @@ export class CalendarService {
 
     constructor(apiService: ApiService, options?: CalendarOptions) {
         this.apiService = apiService;
-        this.options = options ? options : this.options;
+        this.options = { ...this.options, ...options };
     }
 
     async getCalendarItems(calendarId: string, startDate: Date, endDate: Date, limit: number, options?: ApiRequestConfig): Promise<CalendarItem[] | null> {

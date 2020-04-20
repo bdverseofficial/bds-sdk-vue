@@ -44,14 +44,7 @@ export class RouterService {
         this.profileService = profileService;
         this.pause = false;
 
-        if (options) {
-            this.options.routes = options.routes || this.options.routes;
-            this.options.homePage = options.homePage || this.options.homePage;
-            this.options.loginPage = options.loginPage || this.options.loginPage;
-            this.options.page404 = options.page404 || this.options.page404;
-            this.options.otherRoute = options.otherRoute || this.options.otherRoute;
-            this.options.baseUrl = options.baseUrl || this.options.baseUrl;
-        }
+        this.options = { ...this.options, ...options };
         this.options.routes = [...this.options.routes!, this.options.otherRoute!];
         this.injectProps(this.options.routes);
         this.router = new VueRouter({

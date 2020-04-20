@@ -115,11 +115,7 @@ export class AuthService {
         this.configService = configService;
         this.token = undefined;
         this.rememberMe = false;
-        if (options) {
-            this.options.signInCompleted = options.signInCompleted || this.options.signInCompleted;
-            this.options.signOutCompleted = options.signOutCompleted || this.options.signOutCompleted;
-            this.options.refreshOnInit = options.refreshOnInit || this.options.refreshOnInit;
-        }
+        this.options = { ...this.options, ...options };
     }
 
     private tryParseToken(token?: string): Token | undefined {
