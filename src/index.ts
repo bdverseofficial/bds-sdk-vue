@@ -46,7 +46,7 @@ export { ErrorService } from './services/errorService';
 export type ErrorOptions = errorOptions;
 export type BdsError = bdsError;
 
-import { SocUser as socUser, MessageBase as messageBase, BlogPost as blogPost, CalendarItem as calendarItem, MessageBaseGroup as messageBaseGroup, Channel as channel, Blog as blog, Message as message } from './models/soc';
+import { SocUser as socUser, MessageBase as messageBase, BlogPost as blogPost, CalendarItem as calendarItem, MessageBaseGroup as messageBaseGroup, Channel as channel, Blog as blog, Message as message } from './models/Soc';
 export type SocUser = socUser;
 export type MessageBase = messageBase;
 export type BlogPost = blogPost;
@@ -71,7 +71,7 @@ import { CalendarOptions as calendarOptions, CalendarStore as calendarStore } fr
 export type CalendarOptions = calendarOptions;
 export type CalendarStore = calendarStore;
 
-import { ContentType as contentType, Content as content, Source as source } from './models/cms';
+import { ContentType as contentType, Content as content, Source as source } from './models/Cms';
 export type Content = content;
 export type Source = source;
 export type ContentType = contentType;
