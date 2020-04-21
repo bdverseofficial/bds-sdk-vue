@@ -22,31 +22,39 @@ export class CalendarService {
         this.options = { ...this.options, ...options };
     }
 
-    async getCalendarItems(calendarId: string, startDate: Date, endDate: Date, limit: number, options?: ApiRequestConfig): Promise<CalendarItem[] | null> {
+    public async getCalendarItems(calendarId: string, startDate: Date, endDate: Date, limit: number, options?: ApiRequestConfig): Promise<CalendarItem[] | null> {
+        options = {
+            ...options,
+            headers: {
+                filters: [
+                    "SOC.CalendarItem:key|id|meta|title|fullAvatar|startDate|endDate|allDay"
+                ]
+            }
+        };
         let response = await this.apiService.get('api/soc/v1/calendars/' + calendarId + "/items", { ...options, params: { startDate: startDate, endDate: endDate, limit: limit } });
         if (response) return response.data;
         return null;
     }
 
-    async getCalendarItem(calendarId: string, itemId: string, options?: ApiRequestConfig): Promise<CalendarItem | null> {
+    public async getCalendarItem(calendarId: string, itemId: string, options?: ApiRequestConfig): Promise<CalendarItem | null> {
         let response = await this.apiService.get('api/soc/v1/calendars/' + calendarId + "/item/" + itemId, options);
         if (response) return response.data;
         return null;
     }
 
-    async deleteCalendarItem(calendarId: string, itemId: string, options?: ApiRequestConfig): Promise<CalendarItem | null> {
+    public async deleteCalendarItem(calendarId: string, itemId: string, options?: ApiRequestConfig): Promise<CalendarItem | null> {
         let response = await this.apiService.delete('api/soc/v1/calendars/' + calendarId + "/item/" + itemId, options);
         if (response) return response.data;
         return null;
     }
 
-    async putCalendarItem(calendarId: string, item: CalendarItem, options?: ApiRequestConfig): Promise<CalendarItem | null> {
+    public async putCalendarItem(calendarId: string, item: CalendarItem, options?: ApiRequestConfig): Promise<CalendarItem | null> {
         let response = await this.apiService.put('api/soc/v1/calendars/' + calendarId + "/item", item, options);
         if (response) return response.data;
         return null;
     }
 
-    async updateCalendarItem(calendarId: string, itemId: string, item: CalendarItem, options?: ApiRequestConfig): Promise<CalendarItem | null> {
+    public async updateCalendarItem(calendarId: string, itemId: string, item: CalendarItem, options?: ApiRequestConfig): Promise<CalendarItem | null> {
         let response = await this.apiService.post('api/soc/v1/calendars/' + calendarId + "/item/" + itemId, item, options);
         if (response) return response.data;
         return null;

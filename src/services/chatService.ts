@@ -97,6 +97,8 @@ export class ChatService {
             this.store.users = {};
             this.connection.on("RefreshChats", (channelKey: string) =>
                 this.onRefreshChanel(channelKey));
+            this.connection.on("UpdateChannel", (channelKey: string) =>
+                this.onUpdateChanel(channelKey));
             this.store.channels = {};
             for (let index = 0; index < this.store.channelKeys.length; index++) {
                 let channelKey = this.store.channelKeys[index];
@@ -111,6 +113,16 @@ export class ChatService {
     public getChat(channelKey: string): Channel | undefined {
         let chat = this.store.channels[channelKey];
         return chat;
+    }
+
+    private async onUpdateChanel(channelKey: string) {
+        let channel = await this.getChannel(channelKey);
+        if (channel) {
+            this.store.channels[channelKey] = channel;
+        }
+        if (this.store.needRefreshChannelKeys.indexOf(channelKey) === -1) {
+            this.store.needRefreshChannelKeys.push(channelKey);
+        }
     }
 
     private onRefreshChanel(channelKey: string) {
@@ -135,7 +147,7 @@ export class ChatService {
         return null;
     }
 
-    private async getChannel(channelId: string, options?: ApiRequestConfig): Promise<Channel | null> {
+    public async getChannel(channelId: string, options?: ApiRequestConfig): Promise<Channel | null> {
         let response = await this.apiService.get('api/soc/v1/chats/' + channelId, options);
         if (response) return response.data;
         return null;
