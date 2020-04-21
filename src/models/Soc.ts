@@ -34,6 +34,8 @@ export interface CalendarItem extends MessageBase {
     end?: Date;
     endTimeStamp?: string;
     allDay?: boolean;
+    edit?: boolean;
+    opened?: boolean;
 }
 
 export interface MessageBaseGroup extends Group {
