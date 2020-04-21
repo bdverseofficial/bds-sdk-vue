@@ -174,4 +174,9 @@ export class ChatService {
         const response = await this.apiService.delete('api/soc/v1/chats/' + channelId + '/message/' + messageId, options);
         return response.data;
     }
+
+    public async toggleLock(channelId: string, options?: ApiRequestConfig): Promise<Channel | null> {
+        const response = await this.apiService.post('api/soc/v1/chats/' + channelId + '/toggleLock', null, options);
+        return response.data;
+    }
 }
