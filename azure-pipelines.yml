@@ -8,7 +8,7 @@ trigger:
     include:
     - develop    
 
-pool: 'David'  
+pool: 'David'
 
 variables:
   seed: 2
