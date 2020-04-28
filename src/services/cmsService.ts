@@ -220,7 +220,6 @@ export class CmsService {
             if (map) {
                 let contents = [];
                 map = _.orderBy(map, m => { return m.order ?? 0 });
-                console.log(map);
                 for (let item of map) {
                     if (item.content) {
                         let content = await this.loadApiContentKey(item.content.key!);
