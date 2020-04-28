@@ -6,6 +6,8 @@ import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@micros
 import _ from 'lodash';
 
 export interface CmsStore {
+    onCatalogChanged?: (catalogKey: string) => Promise<void>;
+    live?: boolean;
 }
 
 export interface CmsOptions {
@@ -15,6 +17,7 @@ export interface CmsOptions {
     fallbackOnApi?: boolean;
     convertContent?: (type: ContentType, value: string) => string;
     onCatalogChanged?: (catalogKey: string, group: string) => Promise<void>;
+    liveQueryToggle?: string;
 }
 
 export class CmsService {
@@ -47,6 +50,16 @@ export class CmsService {
                 this.options = { ...this.options, ...configCms };
             }
         }
+    }
+
+    public async startLiveUpdate() {
+        this.store.live = true;
+        await this.startConnection();
+    }
+
+    public async stopLiveUpdate() {
+        await this.stopConnection();
+        this.store.live = false;
     }
 
     public async startConnection(): Promise<HubConnection> {
@@ -89,6 +102,7 @@ export class CmsService {
     }
 
     public async loadContent(group: string, type?: ContentType, name?: string, source?: Source): Promise<string | string[] | null> {
+        if (this.store.live && source !== "Local") source = "Api";
         let content = await this.loadContentFromSouce(group, type, name, source || this.options.defaultSource || "Local");
         if (!content && source !== 'Api') {
             content = await this.loadContentFromSouce(group, type, name, "Api");
@@ -142,6 +156,7 @@ export class CmsService {
     }
 
     public async getContentMap(group: string, source?: string): Promise<ContentMapItem[] | null> {
+        if (this.store.live && source !== "Local") source = "Api";
         let map = await this.getContentMapFromSource(group, source || this.options.defaultSource || "Local");
         if (!map && source !== 'Api') {
             map = await this.getContentMapFromSource(group, "Api");

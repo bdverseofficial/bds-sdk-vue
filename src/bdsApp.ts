@@ -14,6 +14,7 @@ import { ChatService, ChatOptions } from './services/chatService';
 import { BlogOptions, BlogService } from './services/blogService';
 import { CalendarOptions, CalendarService } from './services/calendarService';
 import { ContentType } from './models/Cms';
+import { Route } from 'vue-router';
 
 export interface BdsAppOptions {
     config?: ConfigOptions;
@@ -53,13 +54,20 @@ export class BdsApp {
     public ready: boolean = false;
     public mainVue: Vue | null = null;
 
+    public options: BdsAppOptions = {
+    }
+
     constructor(options: BdsAppOptions) {
         Vue.prototype.$app = this;
-
+        this.options = options;
         if (!options.auth) options.auth = {};
         {
             options.auth!.signInCompleted = () => this.signInCompleted();
             options.auth!.signOutCompleted = () => this.signOutCompleted();
+        }
+        if (!options.router) options.router = {};
+        {
+            options.router.onBeforeEach = (to: Route, from: Route) => this.onBeforeEach(to, from);
         }
         if (!options.profile) options.profile = {};
         {
@@ -115,6 +123,21 @@ export class BdsApp {
 
     protected onConvertContent(type: ContentType, content: string): string {
         return content;
+    }
+
+    protected async onBeforeEach(to: Route, from: Route): Promise<void> {
+        if (this.options.cms?.liveQueryToggle) {
+            if (to.query[this.options.cms?.liveQueryToggle] !== undefined) {
+                if (!this.cmsService.store.live) {
+                    await this.cmsService.startLiveUpdate();
+                }
+            }
+            else {
+                if (this.cmsService.store.live) {
+                    await this.cmsService.stopLiveUpdate();
+                }
+            }
+        }
     }
 
     protected async onProfileChanged(): Promise<void> {

@@ -14,6 +14,7 @@ export interface RouterOptions {
     page404?: string;
     loginPage?: string;
     otherRoute?: RouteConfig;
+    onBeforeEach?: (to: Route, from: Route) => Promise<void>;
 }
 
 interface InitialRoute {
@@ -131,7 +132,7 @@ export class RouterService {
         return null;
     }
 
-    private manageAuthGuard(initialRoute: InitialRoute) {
+    private async manageAuthGuard(initialRoute: InitialRoute) {
         if (!this.pause) {
             if (initialRoute.to && initialRoute.to.matched) {
                 let meta = this.getMeta(initialRoute.to);
@@ -152,6 +153,7 @@ export class RouterService {
                     }
                 }
             }
+            if (this.options.onBeforeEach) await this.options.onBeforeEach(initialRoute.to, initialRoute.from);
             initialRoute.next();
         } else {
             if (!this.initialRoute) {
