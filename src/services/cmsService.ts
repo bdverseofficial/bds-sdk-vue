@@ -2,8 +2,11 @@ import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
 import { TranslationService } from './translationService';
 import { Source, ContentType, ContentMapItem, Content } from '../models/Cms';
+import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
 export interface CmsStore {
+    catalogKeys: string[];
+    needRefreshCatalogKeys: string[];
 }
 
 export interface CmsOptions {
@@ -22,11 +25,14 @@ export class CmsService {
     };
 
     public store: CmsStore = {
+        catalogKeys: [],
+        needRefreshCatalogKeys: []
     };
 
     private apiService: ApiService;
     private configService: ConfigService;
     private translationService: TranslationService;
+    private connection?: HubConnection;
 
     constructor(apiService: ApiService, translationService: TranslationService, configService: ConfigService, options?: CmsOptions) {
         this.apiService = apiService;
@@ -42,6 +48,51 @@ export class CmsService {
                 this.options = { ...this.options, ...configCms };
             }
         }
+    }
+
+    public async startConnection(): Promise<HubConnection> {
+        if (!this.connection) {
+            this.connection = new HubConnectionBuilder().withUrl(this.configService.configuration!.serverUrl! + "hubs/cms?appId=" + this.configService.configuration?.appId).build();
+            this.connection.onclose(() => this.internalStartConnection());
+            await this.internalStartConnection();
+        }
+        return this.connection;
+    }
+
+    public async stopConnection(): Promise<void> {
+        if (this.connection) {
+            let c = this.connection;
+            this.connection = undefined;
+            await c.stop();
+        }
+    }
+
+    private async internalStartConnection(): Promise<void> {
+        if (this.connection && this.connection.state !== HubConnectionState.Connected) {
+            await this.connection.start().then(() => this.connectToCatalog()).catch(() => {
+                return new Promise((resolve, reject) => window.setTimeout(() => this.internalStartConnection().then(resolve).catch(reject), 5000));
+            });
+        }
+    }
+
+    private async connectToCatalog(): Promise<void> {
+        if (this.store.catalogKeys && this.connection) {
+            this.store.catalogKeys.forEach(async catalogKey => {
+                await this.connection?.send("AddToCatalog", catalogKey);
+            });
+            this.connection.on("RefreshCms", (catalogKey: string) =>
+                this.onRefreshCatalog(catalogKey));
+        }
+    }
+
+    private onRefreshCatalog(catalogKey: string) {
+        if (this.store.needRefreshCatalogKeys.indexOf(catalogKey) === -1) {
+            this.store.needRefreshCatalogKeys.push(catalogKey);
+        }
+    }
+
+    public markCatalogRefreshed(catalogKey: string) {
+        this.store.needRefreshCatalogKeys = this.store.needRefreshCatalogKeys.filter(s => s !== catalogKey);
     }
 
     public async loadContent(group: string, type?: ContentType, name?: string, source?: Source): Promise<string | string[] | null> {
