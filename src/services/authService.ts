@@ -267,6 +267,12 @@ export class AuthService {
         return headers;
     }
 
+    public getAccessToken(): string | undefined {
+        if (this.token) {
+            return this.token.access_token;
+        }
+    }
+
     public getAuthHeaders(): any {
         if (this.token) {
             let headers: any = {};

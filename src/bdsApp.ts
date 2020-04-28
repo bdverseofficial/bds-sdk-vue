@@ -99,8 +99,8 @@ export class BdsApp {
         this.profileService = new ProfileService(this.apiService, this.configService, options.profile);
         this.routerService = new RouterService(this.authService, this.profileService, options.router);
         this.translationService = new TranslationService(this.apiService, this.configService, options.translation);
-        this.cmsService = new CmsService(this.apiService, this.translationService, this.configService, options.cms);
-        this.chatService = new ChatService(this.apiService, this.configService, options.chat);
+        this.cmsService = new CmsService(this.apiService, this.authService, this.translationService, this.configService, options.cms);
+        this.chatService = new ChatService(this.apiService, this.authService, this.configService, options.chat);
         this.blogService = new BlogService(this.apiService, options.blog);
         this.calendarService = new CalendarService(this.apiService, options.calendar);
         this.bdsService = new BdsService(this.configService, this.apiService, options.bds);

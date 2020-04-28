@@ -4,6 +4,7 @@ import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
 import { HubConnection, HubConnectionState, HubConnectionBuilder } from '@microsoft/signalr';
 import _ from 'lodash';
+import { AuthService } from './authService';
 
 export interface ChatStore {
     channelKeys: string[];
@@ -30,13 +31,15 @@ export class ChatService {
     };
 
     private apiService: ApiService;
+    private authService: AuthService;
     private configService: ConfigService;
     private connection?: HubConnection;
     private httpService: AxiosInstance;
 
-    constructor(apiService: ApiService, configService: ConfigService, options?: ChatOptions) {
+    constructor(apiService: ApiService, authService: AuthService, configService: ConfigService, options?: ChatOptions) {
         this.apiService = apiService;
         this.configService = configService;
+        this.authService = authService;
         this.options = { ...this.options, ...options };
         this.httpService = Axios.create();
     }
@@ -54,7 +57,8 @@ export class ChatService {
 
     private async startConnection(): Promise<HubConnection> {
         if (!this.connection) {
-            this.connection = new HubConnectionBuilder().withUrl(this.configService.configuration!.serverUrl! + "hubs/chats?appId=" + this.configService.configuration?.appId).build();
+            let deviceId = await this.apiService.getDeviceId();
+            this.connection = new HubConnectionBuilder().withUrl(this.configService.configuration!.serverUrl! + "hubs/chats?appId=" + this.configService.configuration?.appId + "&deviceId=" + deviceId, { accessTokenFactory: () => this.authService.getAccessToken()! }).build();
             this.connection.onclose(() => this.internalStartConnection());
             await this.internalStartConnection();
         }

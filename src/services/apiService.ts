@@ -86,7 +86,7 @@ export class ApiService {
         return this.httpService.defaults.headers;
     }
 
-    private async getDeviceId(): Promise<string | undefined> {
+    public async getDeviceId(): Promise<string | undefined> {
         let deviceId = localStorage.getItem("DeviceId");
         if (!deviceId) {
             let options = {};

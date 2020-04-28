@@ -4,6 +4,7 @@ import { TranslationService } from './translationService';
 import { Source, ContentType, ContentMapItem, Content } from '../models/Cms';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import _ from 'lodash';
+import { AuthService } from './authService';
 
 export interface CmsStore {
     onCatalogChanged?: (catalogKey: string) => Promise<void>;
@@ -32,12 +33,14 @@ export class CmsService {
     };
 
     private apiService: ApiService;
+    private authService: AuthService;
     private configService: ConfigService;
     private translationService: TranslationService;
     private connection?: HubConnection;
 
-    constructor(apiService: ApiService, translationService: TranslationService, configService: ConfigService, options?: CmsOptions) {
+    constructor(apiService: ApiService, authService: AuthService, translationService: TranslationService, configService: ConfigService, options?: CmsOptions) {
         this.apiService = apiService;
+        this.authService = authService;
         this.configService = configService;
         this.translationService = translationService;
         this.options = { ...this.options, ...options };
@@ -64,7 +67,8 @@ export class CmsService {
 
     public async startConnection(): Promise<HubConnection> {
         if (!this.connection) {
-            this.connection = new HubConnectionBuilder().withUrl(this.configService.configuration!.serverUrl! + "hubs/cms?appId=" + this.configService.configuration?.appId).build();
+            let deviceId = await this.apiService.getDeviceId();
+            this.connection = new HubConnectionBuilder().withUrl(this.configService.configuration!.serverUrl! + "hubs/cms?appId=" + this.configService.configuration?.appId + "&deviceId=" + deviceId, { accessTokenFactory: () => this.authService.getAccessToken()! }).build();
             this.connection.onclose(() => this.internalStartConnection());
             await this.internalStartConnection();
         }
