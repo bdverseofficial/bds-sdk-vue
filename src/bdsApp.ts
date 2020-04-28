@@ -68,7 +68,7 @@ export class BdsApp {
         if (!options.cms) options.cms = {};
         {
             options.cms.convertContent = (type: ContentType, content: string) => this.onConvertContent(type, content);
-            options.cms.onCatalogChanged = (catalogKey: string) => this.onCatalogChanged(catalogKey);
+            options.cms.onCatalogChanged = (catalogKey: string, group: string) => this.onCatalogChanged(catalogKey, group);
         }
         if (!options.chat) options.chat = {};
         {
@@ -123,7 +123,7 @@ export class BdsApp {
         // }
     }
 
-    protected async onCatalogChanged(catalogKey: string): Promise<void> {
+    protected async onCatalogChanged(catalogKey: string, group: string): Promise<void> {
         // if (this.profileService.store.me && this.profileService.store.me.culture) {
         //     await this.setLocale(this.profileService.store.me.culture.id);
         // }

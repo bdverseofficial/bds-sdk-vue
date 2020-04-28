@@ -13,7 +13,7 @@ export interface CmsOptions {
     defaultSource?: Source;
     fallbackOnApi?: boolean;
     convertContent?: (type: ContentType, value: string) => string;
-    onCatalogChanged?: (catalogKey: string) => Promise<void>;
+    onCatalogChanged?: (catalogKey: string, group: string) => Promise<void>;
 }
 
 export class CmsService {
@@ -76,14 +76,14 @@ export class CmsService {
     private async connectToCatalog(): Promise<void> {
         if (this.connection) {
             await this.connection?.send("AddToApplication");
-            this.connection.on("RefreshCms", (catalogKey: string) =>
-                this.onRefreshCatalog(catalogKey));
+            this.connection.on("RefreshCms", (catalogKey: string, group: string) =>
+                this.onRefreshCatalog(catalogKey, group));
         }
     }
 
-    private async onRefreshCatalog(catalogKey: string) {
+    private async onRefreshCatalog(catalogKey: string, group: string) {
         if (this.options.onCatalogChanged) {
-            await this.options.onCatalogChanged!(catalogKey);
+            await this.options.onCatalogChanged!(catalogKey, group);
         }
     }
 
