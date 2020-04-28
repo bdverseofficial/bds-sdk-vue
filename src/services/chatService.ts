@@ -9,7 +9,6 @@ export interface ChatStore {
     channelKeys: string[];
     channels: Dictionary<Channel>;
     users: Dictionary<SocUser>;
-    needRefreshChannelKeys: string[];
     emojies: any;
 }
 
@@ -27,7 +26,6 @@ export class ChatService {
         channelKeys: [],
         channels: {},
         users: {},
-        needRefreshChannelKeys: [],
         emojies: null,
     };
 
@@ -74,12 +72,10 @@ export class ChatService {
     public async clearUser(): Promise<void> {
         await this.stopConnection();
         this.store.channelKeys = [];
-        this.store.needRefreshChannelKeys = [];
     }
 
     public async initUser(channelKeys: string[]): Promise<void> {
         this.store.channelKeys = channelKeys;
-        this.store.needRefreshChannelKeys = [];
         await this.startConnection();
     }
 
@@ -122,17 +118,11 @@ export class ChatService {
         if (channel) {
             this.store.channels[channelKey] = channel;
         }
-        if (this.store.needRefreshChannelKeys.indexOf(channelKey) === -1) {
-            this.store.needRefreshChannelKeys.push(channelKey);
-        }
     }
 
     private async onRefreshChanel(channelKey: string) {
         if (this.store.channels[channelKey]) {
             this.store.channels[channelKey].newMessages = true;
-        }
-        if (this.store.needRefreshChannelKeys.indexOf(channelKey) === -1) {
-            this.store.needRefreshChannelKeys.push(channelKey);
         }
         if (this.options.onChatChanged) {
             await this.options.onChatChanged!(channelKey);
@@ -143,7 +133,6 @@ export class ChatService {
         if (this.store.channels[channelKey]) {
             this.store.channels[channelKey].newMessages = false;
         }
-        this.store.needRefreshChannelKeys = this.store.needRefreshChannelKeys.filter(s => s !== channelKey);
     }
 
     public async getLinkPreview(uri: string, options?: AxiosRequestConfig): Promise<any> {
