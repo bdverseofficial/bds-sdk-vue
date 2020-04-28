@@ -68,6 +68,11 @@ export class BdsApp {
         if (!options.cms) options.cms = {};
         {
             options.cms.convertContent = (type: ContentType, content: string) => this.onConvertContent(type, content);
+            options.cms.onCatalogChanged = (catalogKey: string) => this.onCatalogChanged(catalogKey);
+        }
+        if (!options.chat) options.chat = {};
+        {
+            options.chat.onChatChanged = (channelKey: string) => this.onChatChanged(channelKey);
         }
         if (!options.error) options.error = {};
         {
@@ -113,6 +118,18 @@ export class BdsApp {
     }
 
     protected async onProfileChanged(): Promise<void> {
+        // if (this.profileService.store.me && this.profileService.store.me.culture) {
+        //     await this.setLocale(this.profileService.store.me.culture.id);
+        // }
+    }
+
+    protected async onCatalogChanged(catalogKey: string): Promise<void> {
+        // if (this.profileService.store.me && this.profileService.store.me.culture) {
+        //     await this.setLocale(this.profileService.store.me.culture.id);
+        // }
+    }
+
+    protected async onChatChanged(channelKey: string): Promise<void> {
         // if (this.profileService.store.me && this.profileService.store.me.culture) {
         //     await this.setLocale(this.profileService.store.me.culture.id);
         // }

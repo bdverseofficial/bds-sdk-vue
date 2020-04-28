@@ -15,10 +15,12 @@ export interface ChatStore {
 
 export interface ChatOptions {
     emojiPath?: string;
+    onChatChanged?: (channelKey: string) => Promise<void>;
 }
 
 export class ChatService {
     private options: ChatOptions = {
+        onChatChanged: (channelKey: string) => Promise.resolve(),
     };
 
     public store: ChatStore = {
@@ -125,12 +127,15 @@ export class ChatService {
         }
     }
 
-    private onRefreshChanel(channelKey: string) {
+    private async onRefreshChanel(channelKey: string) {
         if (this.store.channels[channelKey]) {
             this.store.channels[channelKey].newMessages = true;
         }
         if (this.store.needRefreshChannelKeys.indexOf(channelKey) === -1) {
             this.store.needRefreshChannelKeys.push(channelKey);
+        }
+        if (this.options.onChatChanged) {
+            await this.options.onChatChanged!(channelKey);
         }
     }
 

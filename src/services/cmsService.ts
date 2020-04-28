@@ -5,8 +5,6 @@ import { Source, ContentType, ContentMapItem, Content } from '../models/Cms';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
 export interface CmsStore {
-    catalogKeys: string[];
-    needRefreshCatalogKeys: string[];
 }
 
 export interface CmsOptions {
@@ -15,6 +13,7 @@ export interface CmsOptions {
     defaultSource?: Source;
     fallbackOnApi?: boolean;
     convertContent?: (type: ContentType, value: string) => string;
+    onCatalogChanged?: (catalogKey: string) => Promise<void>;
 }
 
 export class CmsService {
@@ -25,8 +24,7 @@ export class CmsService {
     };
 
     public store: CmsStore = {
-        catalogKeys: [],
-        needRefreshCatalogKeys: []
+        onCatalogChanged: (catalogKey: string) => Promise.resolve(),
     };
 
     private apiService: ApiService;
@@ -76,23 +74,17 @@ export class CmsService {
     }
 
     private async connectToCatalog(): Promise<void> {
-        if (this.store.catalogKeys && this.connection) {
-            this.store.catalogKeys.forEach(async catalogKey => {
-                await this.connection?.send("AddToCatalog", catalogKey);
-            });
+        if (this.connection) {
+            await this.connection?.send("AddToApplication");
             this.connection.on("RefreshCms", (catalogKey: string) =>
                 this.onRefreshCatalog(catalogKey));
         }
     }
 
-    private onRefreshCatalog(catalogKey: string) {
-        if (this.store.needRefreshCatalogKeys.indexOf(catalogKey) === -1) {
-            this.store.needRefreshCatalogKeys.push(catalogKey);
+    private async onRefreshCatalog(catalogKey: string) {
+        if (this.options.onCatalogChanged) {
+            await this.options.onCatalogChanged!(catalogKey);
         }
-    }
-
-    public markCatalogRefreshed(catalogKey: string) {
-        this.store.needRefreshCatalogKeys = this.store.needRefreshCatalogKeys.filter(s => s !== catalogKey);
     }
 
     public async loadContent(group: string, type?: ContentType, name?: string, source?: Source): Promise<string | string[] | null> {
