@@ -3,6 +3,7 @@ import { ConfigService } from './configService';
 import { TranslationService } from './translationService';
 import { Source, ContentType, ContentMapItem, Content } from '../models/Cms';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import _ from 'lodash';
 
 export interface CmsStore {
 }
@@ -145,6 +146,9 @@ export class CmsService {
         if (!map && source !== 'Api') {
             map = await this.getContentMapFromSource(group, "Api");
         }
+        if (map) {
+            map = _.orderBy(map, m => { return m.order ?? 0 });
+        }
         return map;
     }
 
@@ -176,6 +180,14 @@ export class CmsService {
     }
 
     private async getContentByName(group: string, name: string, options?: ApiRequestConfig): Promise<Content | null> {
+        options = {
+            ...options,
+            headers: {
+                filters: [
+                    "CMS.Content:key|id|value|contentType|order"
+                ]
+            }
+        };
         let response = await this.apiService.get("api/cms/v1/content/" + group + "/" + name, options);
         if (response) return response.data;
         return null;
@@ -192,6 +204,8 @@ export class CmsService {
             let map = await this.getApiContentMap(group);
             if (map) {
                 let contents = [];
+                map = _.orderBy(map, m => { return m.order ?? 0 });
+                console.log(map);
                 for (let item of map) {
                     if (item.content) {
                         let content = await this.loadApiContentKey(item.content.key!);
@@ -219,6 +233,7 @@ export class CmsService {
             let map = await this.getLocalContentMap(group);
             if (map) {
                 let contents = [];
+                map = _.orderBy(map, m => { return m.order ?? 0 });
                 for (let item of map) {
                     if (item.name && item.contentType) {
                         let content = await this.loadContentPath(item.contentType, this.options.localPath, group, item.name);
@@ -299,6 +314,7 @@ export class CmsService {
         if (group && this.options.remotePath) {
             let map = await this.getRemoteContentMap(group);
             if (map) {
+                map = _.orderBy(map, m => { return m.order ?? 0 });
                 let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.configService.configuration?.appId;
                 let contents = [];
                 for (let item of map) {
