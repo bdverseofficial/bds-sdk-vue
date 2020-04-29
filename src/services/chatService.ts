@@ -16,11 +16,13 @@ export interface ChatStore {
 export interface ChatOptions {
     emojiPath?: string;
     onChatChanged?: (channelKey: string) => Promise<void>;
+    onUpdateChannel?: (channelKey: string) => Promise<void>;
 }
 
 export class ChatService {
     private options: ChatOptions = {
         onChatChanged: (channelKey: string) => Promise.resolve(),
+        onUpdateChannel: (channelKey: string) => Promise.resolve(),
     };
 
     public store: ChatStore = {
@@ -121,6 +123,9 @@ export class ChatService {
         let channel = await this.getChannel(channelKey);
         if (channel) {
             this.store.channels[channelKey] = channel;
+        }
+        if (this.options.onUpdateChannel) {
+            await this.options.onUpdateChannel!(channelKey);
         }
     }
 

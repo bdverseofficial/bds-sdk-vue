@@ -81,6 +81,7 @@ export class BdsApp {
         if (!options.chat) options.chat = {};
         {
             options.chat.onChatChanged = (channelKey: string) => this.onChatChanged(channelKey);
+            options.chat.onUpdateChannel = (channelKey: string) => this.onUpdateChannel(channelKey);
         }
         if (!options.error) options.error = {};
         {
@@ -147,15 +148,12 @@ export class BdsApp {
     }
 
     protected async onCatalogChanged(catalogKey: string, group: string): Promise<void> {
-        // if (this.profileService.store.me && this.profileService.store.me.culture) {
-        //     await this.setLocale(this.profileService.store.me.culture.id);
-        // }
     }
 
     protected async onChatChanged(channelKey: string): Promise<void> {
-        // if (this.profileService.store.me && this.profileService.store.me.culture) {
-        //     await this.setLocale(this.profileService.store.me.culture.id);
-        // }
+    }
+
+    protected async onUpdateChannel(channelKey: string): Promise<void> {
     }
 
     protected signInCompleted(): Promise<void> {
