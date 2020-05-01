@@ -1,0 +1,68 @@
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+  batch: true  
+
+pool: 'David'
+
+parameters:
+- name: releaseTag # name of the parameter; required
+  type: string # data type of the parameter; required  
+
+variables:
+  seed: 2
+  buildCounter: $[counter(variables['seed'], 59)]
+
+steps:
+
+- task: PowerShell@2
+  displayName: 'Set build number'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $v = [string](Get-Content package.json | ConvertFrom-Json).version
+      if ('$(releaseTag)' -eq '')
+      {
+          Write-Host "##vso[build.updatebuildnumber]$v"
+      }
+      else
+      {
+          Write-Host "##vso[build.updatebuildnumber]$v-$(releaseTag).$(buildCounter)"
+      }
+
+- task: CmdLine@2
+  displayName: 'Install dependencies'
+  inputs:
+    script: 'yarn install'    
+
+- task: CmdLine@2
+  displayName: 'Build'
+  inputs:
+    script: 'yarn build'    
+    
+- task: PowerShell@2
+  displayName: 'Set package.json version'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $json = Get-Content package.json | ConvertFrom-Json
+      if ('$(releaseTag)' -eq '')
+      {
+          Write-Host "##vso[build.updatebuildnumber]$v"
+          $json.version = "$($json.version)"
+      }
+      else
+      {          
+          $json.version = "$($json.version)-$(releaseTag)"
+      }      
+      (ConvertTo-Json $json) > package.json
+
+- task: Npm@1
+  displayName: 'Publish npm package'
+  inputs:
+    command: 'custom'    
+    customCommand: 'publish --tag $(releaseTag)'
+    customRegistry: 'useFeed'
+    customFeed: '7cc4d38f-2e0f-42df-a448-8e7b7482ea39'
