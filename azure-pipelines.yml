@@ -6,7 +6,10 @@ trigger:
   batch: true
   branches:
     include:
-    - develop    
+    - develop
+  paths:
+    include:
+    - src/*
 
 pool: 'David'
 
