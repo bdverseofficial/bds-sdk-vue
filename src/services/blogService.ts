@@ -28,7 +28,7 @@ export class BlogService {
             headers: {
                 filters: [
                     "SOC.BlogPost:key|id|meta|title|fullAvatar"
-                ]
+                ].join(",")
             }
         };
         let response = await this.apiService.get('api/soc/v1/blogs/' + blogId + "/posts", { ...options, params: { draft: draft, limit: limit, scrollId: scrollId } });

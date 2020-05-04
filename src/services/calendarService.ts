@@ -28,7 +28,7 @@ export class CalendarService {
             headers: {
                 filters: [
                     "SOC.CalendarItem:key|id|meta|title|fullAvatar|startDate|endDate|allDay"
-                ]
+                ].join(",")
             }
         };
         let response = await this.apiService.get('api/soc/v1/calendars/' + calendarId + "/items", { ...options, params: { startDate: startDate, endDate: endDate, limit: limit } });

@@ -204,7 +204,7 @@ export class CmsService {
             headers: {
                 filters: [
                     "CMS.Content:key|id|value|contentType|order"
-                ]
+                ].join(",")
             }
         };
         let response = await this.apiService.get("api/cms/v1/content/" + group + "/" + name, options);
