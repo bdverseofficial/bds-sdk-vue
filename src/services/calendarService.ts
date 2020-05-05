@@ -1,5 +1,5 @@
 import { ApiService, ApiRequestConfig } from './apiService';
-import { CalendarItem } from '../models/Soc';
+import { CalendarItem, Calendar } from '../models/Soc';
 
 export interface CalendarStore {
 }
@@ -56,6 +56,12 @@ export class CalendarService {
 
     public async updateCalendarItem(calendarId: string, itemId: string, item: CalendarItem, options?: ApiRequestConfig): Promise<CalendarItem | null> {
         let response = await this.apiService.post('api/soc/v1/calendars/' + calendarId + "/item/" + itemId, item, options);
+        if (response) return response.data;
+        return null;
+    }
+
+    async getCalendar(calendarId: string, options?: ApiRequestConfig): Promise<Calendar | null> {
+        let response = await this.apiService.get('api/soc/v1/calendars/' + calendarId, options);
         if (response) return response.data;
         return null;
     }
