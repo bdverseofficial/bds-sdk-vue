@@ -50,6 +50,10 @@ export interface Blog extends MessageBaseGroup {
 
 }
 
+export interface Calendar extends MessageBaseGroup {
+
+}
+
 export interface Message extends MessageBase {
     messageType?: string;
     fullAsset?: Asset;
