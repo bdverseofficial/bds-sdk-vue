@@ -1,4 +1,4 @@
-import { Cart, Order, ProductOffersResponse, Review } from '../models/Cs';
+import { Cart, Order, ProductOffersResponse, Review, B2CCustomer } from '../models/Cs';
 import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
 import { SearchEntityResponse } from '../models/Search';
@@ -32,6 +32,16 @@ export class CsService {
 
     public async refreshCart() {
         this.store.cart = (await this.getCartApi()) || undefined;
+    }
+
+    public async register(customer: B2CCustomer, password: string, options?: ApiRequestConfig): Promise<B2CCustomer | null> {
+        let request = {
+            customer: customer,
+            password: password
+        };
+        let response = await this.apiService.post('api/cs/v1/b2c/registerCustomer', request, options);
+        if (response) return response.data;
+        return null;
     }
 
     public async removeLineFromCart(lineNumber: string) {
