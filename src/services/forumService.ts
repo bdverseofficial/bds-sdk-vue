@@ -34,26 +34,41 @@ export class ForumService {
     }
 
     public async getTopic(topicId: string, options?: ApiRequestConfig): Promise<Topic | null> {
-        let response = await this.apiService.get('api/soc/v1/forum/topics/' + topicId, options);
+        let response = await this.apiService.get('api/soc/v1/forum/topic/' + topicId, options);
         if (response) return response.data;
         return null;
     }
 
     public async getThreads(topicId: string, limit: number, scrollId?: string, options?: ApiRequestConfig): Promise<Thread[] | null> {
-        let response = await this.apiService.get('api/soc/v1/forum/topics/' + topicId + "/threads", { ...options, params: { limit: limit, scrollId: scrollId } });
+        let response = await this.apiService.get('api/soc/v1/forum/topic/' + topicId + "/threads", { ...options, params: { limit: limit, scrollId: scrollId } });
         if (response) return response.data;
         return null;
     }
 
     public async getThread(threadId: string, options?: ApiRequestConfig): Promise<Thread | null> {
-        let response = await this.apiService.get('api/soc/v1/forum/threads/' + threadId, options);
+        let response = await this.apiService.get('api/soc/v1/forum/' + threadId, options);
         if (response) return response.data;
         return null;
     }
 
     public async getPosts(threadId: string, limit: number, scrollId?: string, options?: ApiRequestConfig): Promise<Post[] | null> {
-        let response = await this.apiService.get('api/soc/v1/forum/threads/' + threadId + "/posts", { ...options, params: { limit: limit, scrollId: scrollId } });
+        let response = await this.apiService.get('api/soc/v1/forum/' + threadId + "/posts", { ...options, params: { limit: limit, scrollId: scrollId } });
         if (response) return response.data;
         return null;
+    }
+
+    async putPost(threadId: string, post: Post, options?: ApiRequestConfig): Promise<Post | null> {
+        const response = await this.apiService.put('api/soc/v1/forum/' + threadId + '/post', post, options);
+        return response.data;
+    }
+
+    async updatePost(threadId: string, postId: string, post: Post, options?: ApiRequestConfig): Promise<Post | null> {
+        const response = await this.apiService.post('api/soc/v1/forum/' + threadId + '/post/' + postId, post, options);
+        return response.data;
+    }
+
+    async deletePost(threadId: string, postId: string, options?: ApiRequestConfig): Promise<Post | null> {
+        const response = await this.apiService.delete('api/soc/v1/forum/' + threadId + '/post/' + postId, options);
+        return response.data;
     }
 }
