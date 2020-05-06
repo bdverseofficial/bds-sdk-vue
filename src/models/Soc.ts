@@ -60,14 +60,12 @@ export interface Message extends MessageBase {
     fullAsset?: Asset;
 }
 
-export interface Topic extends Group {
+export interface Topic extends MessageBaseGroup {
     lastPost?: Post;
 }
 
-export interface Thread extends BdsEntity {
+export interface Thread extends MessageBaseGroup {
     topic?: Reference;
-    title?: string;
-    description?: string;
     lastPost?: Post;
 }
 
