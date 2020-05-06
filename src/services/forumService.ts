@@ -52,6 +52,14 @@ export class ForumService {
     }
 
     public async getPosts(threadId: string, limit: number, scrollId?: string, options?: ApiRequestConfig): Promise<Post[] | null> {
+        options = {
+            ...options,
+            headers: {
+                filters: [
+                    "SOC.BlogPost:key|id|meta|title|fullAvatar"
+                ].join(",")
+            }
+        };
         let response = await this.apiService.get('api/soc/v1/forum/' + threadId + "/posts", { ...options, params: { limit: limit, scrollId: scrollId } });
         if (response) return response.data;
         return null;
@@ -70,5 +78,11 @@ export class ForumService {
     async deletePost(threadId: string, postId: string, options?: ApiRequestConfig): Promise<Post | null> {
         const response = await this.apiService.delete('api/soc/v1/forum/' + threadId + '/post/' + postId, options);
         return response.data;
+    }
+
+    async getPost(threadId: string, postId: string, options?: ApiRequestConfig): Promise<Post | null> {
+        let response = await this.apiService.get('api/soc/v1/forum/' + threadId + "/post/" + postId, options);
+        if (response) return response.data;
+        return null;
     }
 }
