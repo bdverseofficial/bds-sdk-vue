@@ -40,6 +40,7 @@ export interface CalendarItem extends MessageBase {
 
 export interface MessageBaseGroup extends Group {
     newMessages?: boolean;
+    locked?: boolean;
 }
 
 export interface Channel extends MessageBaseGroup {
