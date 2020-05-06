@@ -83,6 +83,15 @@ export type ProductOffersResponse = productOffersResponse;
 export type ProductQuantity = productQuantity;
 export type Review = review;
 
+export { SearchService } from './services/searchService';
+import { SearchOptions as searchOptions, SearchStore as searchStore } from './services/searchService';
+export type SearchOptions = searchOptions;
+export type SearchStore = searchStore;
+
+export { ForumService } from './services/forumService';
+import { ForumOptions as forumOptions, ForumStore as forumStore } from './services/forumService';
+export type ForumOptions = forumOptions;
+export type ForumStore = forumStore;
 
 export { ChatService } from './services/chatService';
 import { ChatOptions as chatOptions, ChatStore as chatStore } from './services/chatService';
