@@ -160,12 +160,21 @@ export class BdsApp {
     }
 
     protected async onCatalogChanged(catalogKey: string, group: string): Promise<void> {
+        if (this.mainVue) {
+            this.mainVue.$emit("catalogchanged", catalogKey, group);
+        }
     }
 
     protected async onChatChanged(channelKey: string): Promise<void> {
+        if (this.mainVue) {
+            this.mainVue.$emit("chatchanged", channelKey);
+        }
     }
 
     protected async onUpdateChannel(channelKey: string): Promise<void> {
+        if (this.mainVue) {
+            this.mainVue.$emit("updateChannel", channelKey);
+        }
     }
 
     protected signInCompleted(): Promise<void> {
