@@ -1,7 +1,7 @@
 import { Cart, Order, ProductOffersResponse, Review } from '../models/Cs';
 import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
-import { SearchEntityResponse } from '@/models/Search';
+import { SearchEntityResponse } from '../models/Search';
 
 export interface CsOptions {
 }
