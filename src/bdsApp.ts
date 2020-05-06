@@ -15,6 +15,7 @@ import { BlogOptions, BlogService } from './services/blogService';
 import { CalendarOptions, CalendarService } from './services/calendarService';
 import { ContentType } from './models/Cms';
 import { Route } from 'vue-router';
+import { CsService, CsOptions } from './services/csService';
 
 export interface BdsAppOptions {
     config?: ConfigOptions;
@@ -26,6 +27,7 @@ export interface BdsAppOptions {
     error?: ErrorOptions;
     router?: RouterOptions;
     profile?: ProfileOptions;
+    cs?: CsOptions;
     translation?: TranslationOptions;
     api?: ApiOptions;
     bds?: BdsOptions;
@@ -45,6 +47,7 @@ export class BdsApp {
     public routerService: RouterService;
     public cmsService: CmsService;
     public chatService: ChatService;
+    public csService: CsService;
     public blogService: BlogService;
     public calendarService: CalendarService;
     public translationService: TranslationService;
@@ -104,6 +107,7 @@ export class BdsApp {
         this.chatService = new ChatService(this.apiService, this.authService, this.configService, options.chat);
         this.blogService = new BlogService(this.apiService, options.blog);
         this.calendarService = new CalendarService(this.apiService, options.calendar);
+        this.csService = new CsService(this.configService, this.apiService, options.cs);
         this.bdsService = new BdsService(this.configService, this.apiService, options.bds);
 
         this.title = options.title;

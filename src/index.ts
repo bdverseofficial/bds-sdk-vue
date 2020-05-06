@@ -46,7 +46,7 @@ export { ErrorService } from './services/errorService';
 export type ErrorOptions = errorOptions;
 export type BdsError = bdsError;
 
-import { Dictionary as dictionary, Calendar as calendar, SocUser as socUser, MessageBase as messageBase, BlogPost as blogPost, CalendarItem as calendarItem, MessageBaseGroup as messageBaseGroup, Channel as channel, Blog as blog, Message as message } from './models/Soc';
+import { Dictionary as dictionary, Calendar as calendar, SocUser as socUser, MessageBase as messageBase, BlogPost as blogPost, CalendarItem as calendarItem, MessageBaseGroup as messageBaseGroup, Channel as channel, Blog as blog, Message as message, Post as post, Thread as thread, Topic as topic } from './models/Soc';
 export type SocUser = socUser;
 export type Dictionary<T> = dictionary<T>;
 export type MessageBase = messageBase;
@@ -57,6 +57,32 @@ export type Channel = channel;
 export type Blog = blog;
 export type Calendar = calendar;
 export type Message = message;
+export type Thread = thread;
+export type Topic = topic;
+export type Post = post;
+
+import { SearchEntityResponse as searchEntityResponse, SearchItem as searchItem, SearchParameters as searchParameters, SearchRequest as searchRequest } from './models/Search'
+export type SearchEntityResponse = searchEntityResponse;
+export type SearchItem = searchItem;
+export type SearchParameters = searchParameters;
+export type SearchRequest = searchRequest;
+
+import { Licence as licence } from './models/Lic'
+export type Licence = licence;
+
+import { B2CCustomer as b2CCustomer, Cart as cart, CartLine as cartLine, Offer as offer, Order as order, Product as product, ProductAsset as productAsset, ProductOffers as productOffers, ProductOffersResponse as productOffersResponse, ProductQuantity as productQuantity, Review as review } from './models/Cs'
+export type B2CCustomer = b2CCustomer;
+export type Cart = cart;
+export type CartLine = cartLine;
+export type Offer = offer;
+export type Order = order;
+export type Product = product;
+export type ProductAsset = productAsset;
+export type ProductOffers = productOffers;
+export type ProductOffersResponse = productOffersResponse;
+export type ProductQuantity = productQuantity;
+export type Review = review;
+
 
 export { ChatService } from './services/chatService';
 import { ChatOptions as chatOptions, ChatStore as chatStore } from './services/chatService';
@@ -82,6 +108,11 @@ import { CmsOptions as cmsOptions, CmsStore as cmsStore } from './services/cmsSe
 export { CmsService } from './services/cmsService';
 export type CmsOptions = cmsOptions;
 export type CmsStore = cmsStore;
+
+import { CsOptions as csOptions, CsStore as csStore } from './services/csService';
+export { CsService } from './services/csService';
+export type CsOptions = csOptions;
+export type CsStore = csStore;
 
 import { BdsOptions as bdsOptions, BdsStore as bdsStore } from './services/bdsService';
 export { BdsService } from './services/bdsService';

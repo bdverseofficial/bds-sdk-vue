@@ -51,7 +51,7 @@ export class ChatService {
             this.apiService.get(this.options.emojiPath, {
                 baseURL: "/"
             }).then(response => {
-                let groups = _.groupBy(response.data, "subgroup");
+                let groups = _.groupBy(response.data, "group");
                 this.store.emojies = Object.keys(groups).map(k => { return { char: groups[k][0].char, emojies: groups[k].map(kk => kk.char) }; });
             }, () => { }).catch(() => { });
         }

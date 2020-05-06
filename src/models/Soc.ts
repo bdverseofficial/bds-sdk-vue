@@ -58,3 +58,27 @@ export interface Message extends MessageBase {
     messageType?: string;
     fullAsset?: Asset;
 }
+
+export interface Topic extends Group {
+    lastPost?: Post;
+}
+
+export interface Thread extends BdsEntity {
+    topic?: Reference;
+    title?: string;
+    description?: string;
+    lastPost?: Post;
+}
+
+export interface Post extends MessageBase {
+    topic?: Reference;
+    thread?: Reference;
+    relatedTo?: Reference;
+    star?: boolean;
+    pinned?: boolean;
+    score?: number;
+    numberOfScore?: number;
+    isPopular?: boolean;
+    isBest?: boolean;
+    flags?: string[];
+}
