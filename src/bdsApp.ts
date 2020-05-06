@@ -16,6 +16,8 @@ import { CalendarOptions, CalendarService } from './services/calendarService';
 import { ContentType } from './models/Cms';
 import { Route } from 'vue-router';
 import { CsService, CsOptions } from './services/csService';
+import { SearchOptions, SearchService } from './services/searchService';
+import { ForumOptions, ForumService } from './services/forumService';
 
 export interface BdsAppOptions {
     config?: ConfigOptions;
@@ -28,6 +30,8 @@ export interface BdsAppOptions {
     router?: RouterOptions;
     profile?: ProfileOptions;
     cs?: CsOptions;
+    search?: SearchOptions;
+    forum?: ForumOptions;
     translation?: TranslationOptions;
     api?: ApiOptions;
     bds?: BdsOptions;
@@ -51,6 +55,8 @@ export class BdsApp {
     public blogService: BlogService;
     public calendarService: CalendarService;
     public translationService: TranslationService;
+    public forumService: ForumService;
+    public searchService: SearchService;
 
     public title?: string;
 
@@ -103,6 +109,8 @@ export class BdsApp {
         this.profileService = new ProfileService(this.apiService, this.configService, options.profile);
         this.routerService = new RouterService(this.authService, this.profileService, options.router);
         this.translationService = new TranslationService(this.apiService, this.configService, options.translation);
+        this.searchService = new SearchService(this.configService, this.apiService, options.search);
+        this.forumService = new ForumService(this.configService, this.apiService, options.forum);
         this.cmsService = new CmsService(this.apiService, this.authService, this.translationService, this.configService, options.cms);
         this.chatService = new ChatService(this.apiService, this.authService, this.configService, options.chat);
         this.blogService = new BlogService(this.apiService, options.blog);
@@ -186,6 +194,8 @@ export class BdsApp {
         await this.authService.init();
         await this.cmsService.init();
         await this.chatService.init();
+        await this.searchService.init();
+        await this.forumService.init();
         await this.bdsService.init();
         await this.setLocale();
         this.ready = true;

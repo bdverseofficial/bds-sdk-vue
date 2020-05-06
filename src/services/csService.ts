@@ -27,7 +27,10 @@ export class CsService {
     }
 
     public async init() {
-        this.refreshCart();
+    }
+
+    public async initUser() {
+        await this.refreshCart();
     }
 
     public async refreshCart() {
