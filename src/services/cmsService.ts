@@ -225,7 +225,7 @@ export class CmsService {
     public async onBeforeEach(to: Route, from: Route): Promise<void> {
         if (this.options.cmsQueryKey) {
             let mode = to.query[this.options.cmsQueryKey];
-            mode = mode.toString().toUpperCase() || "DEFAULT";
+            mode = (mode || "DEFAULT").toString().toUpperCase();
             switch (mode) {
                 case "LIVE":
                     {
