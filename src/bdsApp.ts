@@ -139,18 +139,7 @@ export class BdsApp {
     }
 
     protected async onBeforeEach(to: Route, from: Route): Promise<void> {
-        if (this.options.cms?.liveQueryToggle) {
-            if (to.query[this.options.cms?.liveQueryToggle] !== undefined) {
-                if (!this.cmsService.store.live) {
-                    await this.cmsService.startLiveUpdate();
-                }
-            }
-            else {
-                if (this.cmsService.store.live) {
-                    await this.cmsService.stopLiveUpdate();
-                }
-            }
-        }
+        await this.cmsService.onBeforeEach(to, from);
     }
 
     protected async onProfileChanged(): Promise<void> {

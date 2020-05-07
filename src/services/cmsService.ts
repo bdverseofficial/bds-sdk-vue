@@ -5,10 +5,13 @@ import { Source, ContentType, ContentMapItem, Content } from '../models/Cms';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import _ from 'lodash';
 import { AuthService } from './authService';
+import { Route } from 'vue-router';
+
+export type CmsMode = "DEFAULT" | "NONE" | "LIVE";
 
 export interface CmsStore {
     onCatalogChanged?: (catalogKey: string) => Promise<void>;
-    live?: boolean;
+    mode: CmsMode;
 }
 
 export interface CmsOptions {
@@ -18,7 +21,7 @@ export interface CmsOptions {
     fallbackOnApi?: boolean;
     convertContent?: (type: ContentType, value: string) => string;
     onCatalogChanged?: (catalogKey: string, group: string) => Promise<void>;
-    liveQueryToggle?: string;
+    cmsQueryKey?: string;
 }
 
 export class CmsService {
@@ -29,6 +32,7 @@ export class CmsService {
     };
 
     public store: CmsStore = {
+        mode: "DEFAULT",
         onCatalogChanged: (catalogKey: string) => Promise.resolve(),
     };
 
@@ -56,13 +60,17 @@ export class CmsService {
     }
 
     public async startLiveUpdate() {
-        this.store.live = true;
-        await this.startConnection();
+        if (this.store.mode != "LIVE") {
+            this.store.mode = "LIVE";
+            await this.startConnection();
+        }
     }
 
     public async stopLiveUpdate() {
-        await this.stopConnection();
-        this.store.live = false;
+        if (this.store.mode == "LIVE") {
+            await this.stopConnection();
+            this.store.mode = "DEFAULT";
+        }
     }
 
     public async startConnection(): Promise<HubConnection> {
@@ -106,7 +114,8 @@ export class CmsService {
     }
 
     public async loadContent(group: string, type?: ContentType, name?: string, source?: Source): Promise<string | string[] | null> {
-        if (this.store.live && source !== "Local") source = "Api";
+        if (this.store.mode === "NONE") return null;
+        if (this.store.mode === "LIVE" && source !== "Local") source = "Api";
         let content = await this.loadContentFromSouce(group, type, name, source || this.options.defaultSource || "Local");
         if (!content && source !== 'Api') {
             content = await this.loadContentFromSouce(group, type, name, "Api");
@@ -160,7 +169,8 @@ export class CmsService {
     }
 
     public async getContentMap(group: string, source?: string): Promise<ContentMapItem[] | null> {
-        if (this.store.live && source !== "Local") source = "Api";
+        if (this.store.mode === "NONE") return null;
+        if (this.store.mode === "LIVE" && source !== "Local") source = "Api";
         let map = await this.getContentMapFromSource(group, source || this.options.defaultSource || "Local");
         if (!map && source !== 'Api') {
             map = await this.getContentMapFromSource(group, "Api");
@@ -210,6 +220,26 @@ export class CmsService {
         let response = await this.apiService.get("api/cms/v1/content/" + group + "/" + name, options);
         if (response) return response.data;
         return null;
+    }
+
+    public async onBeforeEach(to: Route, from: Route): Promise<void> {
+        if (this.options.cmsQueryKey) {
+            let mode = to.query[this.options.cmsQueryKey];
+            mode = mode || "DEFAULT";
+            switch (mode) {
+                case "LIVE":
+                    {
+                        await this.startLiveUpdate();
+                    }
+                    break;
+                default:
+                    {
+                        await this.stopLiveUpdate();
+                        this.store.mode = mode as CmsMode;
+                    }
+                    break;
+            }
+        }
     }
 
     private async getContentByKey(contentKey: string, options?: ApiRequestConfig): Promise<Content | null> {
