@@ -7,4 +7,5 @@ export interface Licence extends BdsEntity {
     owner?: Reference;
     licenceKey?: string;
     status?: string;
+    statusMessage?: string;
 }
