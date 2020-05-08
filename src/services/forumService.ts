@@ -65,6 +65,21 @@ export class ForumService {
         return null;
     }
 
+    async putThread(topicId: string, thread: Thread, options?: ApiRequestConfig): Promise<Post | null> {
+        const response = await this.apiService.put('api/soc/v1/forum/topic/' + topicId + '/thread', thread, options);
+        return response.data;
+    }
+
+    async updateThread(topicId: string, threadId: string, thread: Thread, options?: ApiRequestConfig): Promise<Post | null> {
+        const response = await this.apiService.post('api/soc/v1/forum/topic/' + topicId + '/thread/' + threadId, thread, options);
+        return response.data;
+    }
+
+    async deleteThread(topicId: string, threadId: string, options?: ApiRequestConfig): Promise<Post | null> {
+        const response = await this.apiService.delete('api/soc/v1/forum/topic/' + topicId + '/thread/' + threadId, options);
+        return response.data;
+    }
+
     async putPost(threadId: string, post: Post, options?: ApiRequestConfig): Promise<Post | null> {
         const response = await this.apiService.put('api/soc/v1/forum/' + threadId + '/post', post, options);
         return response.data;
