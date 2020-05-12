@@ -314,7 +314,6 @@ export class CmsService {
     private async loadApiContentKey(contentKey: string): Promise<string | null> {
         let content = await this.getContentByKey(contentKey);
         if (content) {
-            let markdown = content.contentType === "MARKDOWN";
             let value = content.value!;
             if (this.options.convertContent) {
                 value = this.options.convertContent(content.contentType! as ContentType, value!);
@@ -347,6 +346,7 @@ export class CmsService {
     private getExtension(type: ContentType): string {
         if (type === "MARKDOWN") return "md";
         if (type === "HTML") return "html";
+        if (type === "JSON") return "json";
         return "txt";
     }
 
