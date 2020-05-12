@@ -1,5 +1,6 @@
 import { Phone, User, Address } from './User';
 import { Reference } from './Reference';
+import { BdsEntity, UserEvent } from '..';
 
 export interface Personal {
     mobilePhone?: Phone;
@@ -41,4 +42,17 @@ export interface Account extends Lead {
 }
 
 export interface Person extends Account {
+}
+
+export interface Case extends BdsEntity {
+    description?: string;
+    subject?: string;
+    account?: Reference;
+    relatedTo?: Reference;
+    origin?: string;
+    reference?: string;
+    closed?: UserEvent;
+    reason?: string;
+    status?: string;
+    caseType?: string;
 }
