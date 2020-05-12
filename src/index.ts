@@ -46,6 +46,17 @@ export { ErrorService } from './services/errorService';
 export type ErrorOptions = errorOptions;
 export type BdsError = bdsError;
 
+import { Account as account, Case as crmCase, Communication as communication, Company as compagny, Individual as individual, Lead as lead, Person as person, Personal as personal, Professional as professional } from "./models/Crm";
+export type Account = account;
+export type Case = crmCase;
+export type Communication = communication;
+export type Company = compagny;
+export type Individual = individual;
+export type Lead = lead;
+export type Person = person;
+export type Personal = personal;
+export type Professional = professional;
+
 import { Dictionary as dictionary, Calendar as calendar, SocUser as socUser, MessageBase as messageBase, BlogPost as blogPost, CalendarItem as calendarItem, MessageBaseGroup as messageBaseGroup, Channel as channel, Blog as blog, Message as message, Post as post, Thread as thread, Topic as topic } from './models/Soc';
 export type SocUser = socUser;
 export type Dictionary<T> = dictionary<T>;
