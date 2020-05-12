@@ -431,18 +431,19 @@ export class CmsService {
         let fullPath = root + (root.endsWith("/") ? "" : "/") + group + "/" + language + "." + name + "." + this.getExtension(type);
         try {
             let response = await this.apiService.get(fullPath, {
-                baseURL: "/"
+                baseURL: "/",
+                transformResponse: (d) => d,
             });
             if (response.status === 200) {
                 let content = response.data as string;
-                let markdown = type === "MARKDOWN";
-                if (this.options.convertContent) {
-                    content = this.options.convertContent(type, content);
+                if (content) {
+                    if (this.options.convertContent) {
+                        content = this.options.convertContent(type, content);
+                    }
+                    return content;
                 }
-                return content;
-            } else {
-                return response.data;
             }
+            return response.data;
         } catch {
             return null;
         }
