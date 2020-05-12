@@ -7,7 +7,7 @@ export interface Content extends BdsEntity {
     order?: string;
 }
 
-export type ContentType = "DEFAULT" | "HTML" | "MARKDOWN";
+export type ContentType = "DEFAULT" | "HTML" | "MARKDOWN" | "JSON";
 
 export interface ContentMapItem {
     content?: Reference;
