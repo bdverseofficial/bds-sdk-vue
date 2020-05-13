@@ -1,7 +1,7 @@
 import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
 import { Thread, Topic, Post } from '../models/Soc';
-import { SearchEntityResponse } from '@/models/Search';
+import { SearchEntityResponse } from '../models/Search';
 
 export interface ForumOptions {
 }
