@@ -1,6 +1,7 @@
 import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
 import { Thread, Topic, Post } from '../models/Soc';
+import { SearchEntityResponse } from '@/models/Search';
 
 export interface ForumOptions {
 }
@@ -98,6 +99,32 @@ export class ForumService {
     async getPost(threadId: string, postId: string, options?: ApiRequestConfig): Promise<Post | null> {
         let response = await this.apiService.get('api/soc/v1/forum/' + threadId + "/post/" + postId, options);
         if (response) return response.data;
+        return null;
+    }
+
+    public async searchForum(request: any): Promise<SearchEntityResponse | null> {
+        let options = {
+            headers: {
+                filters: [
+                    "Facet:name|localName",
+                    "FacetValue:name|localName",
+                ].join(",")
+            }
+        };
+        return await this.searchForumApi(request, options);
+    }
+
+    private async searchForumApi(request: any, options?: ApiRequestConfig): Promise<SearchEntityResponse | null> {
+        if (request) {
+            if (this.configService.configuration) {
+                let response = await this.apiService.post(
+                    "api/soc/v1/forum/search",
+                    request,
+                    options
+                );
+                return response.data;
+            }
+        }
         return null;
     }
 }
