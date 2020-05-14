@@ -111,7 +111,7 @@ export class ProfileService {
         return undefined;
     }
 
-    async registerUser(member: User, password: string, identityProviderType: string, options?: ApiRequestConfig): Promise<User | undefined> {
+    async registerUser(member: User, password: string, options?: ApiRequestConfig): Promise<User | undefined> {
         const request = {
             user: member,
             password: password,
