@@ -63,7 +63,7 @@ export class ApiService {
                 let customError = false;
                 if (error.response && error.response.data && error.response.data.errorCode) {
                     customError = true;
-                    userError = { userError, ...error.response.data };
+                    userError = { ...userError, ...error.response.data };
                 } else {
                     if (error.response) {
                         userError.errorCode = error.response.status || "";

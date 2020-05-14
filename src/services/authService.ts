@@ -146,14 +146,14 @@ export class AuthService {
         }
     }
 
-    public async signOut(keepStorage: boolean): Promise<void> {
+    public async signOut(keepStorage: boolean, soft?: boolean): Promise<void> {
         this.token = undefined;
         if (this.refreshTimeout) window.clearTimeout(this.refreshTimeout);
         if (!keepStorage) {
             localStorage.removeItem('refresh_token');
             sessionStorage.removeItem('refresh_token');
         }
-        if (this.externalSignOut) {
+        if (soft && this.externalSignOut) {
             await this.externalSignOut();
         }
         if (this.store!.isAuthenticated) {
@@ -182,7 +182,7 @@ export class AuthService {
             window.clearTimeout(this.refreshTimeout);
             this.refreshTimeout = undefined;
         }
-        let timeSpan = this.configService.configuration!.refreshTokenTimeSpanSecond || 30000;
+        let timeSpan = 30000;
         if (this.token && this.token.expires_in) {
             timeSpan = (this.token.expires_in / 2) * 1000;
         }
@@ -199,12 +199,19 @@ export class AuthService {
             if (deviceToken) {
                 request.deviceToken = deviceToken;
             }
-            this.token = await this.refreshTokenApi(request);
+            let newToken = await this.refreshTokenApi(request);
+            this.token = newToken;
             this.store!.isAuthenticated = this.token ? true : false;
             this.saveToken();
             this.scheduleRefreshToken();
-        } catch {
-            await this.signOut(true);
+        } catch (e) {
+            let code = e.underlyingError ? e.underlyingError.response.status : e.errorCode;
+            if (code === 401 || code === 403) {
+                await this.signOut(true, true);
+            }
+            else {
+                this.scheduleRefreshToken();
+            }
         }
     }
 
@@ -225,7 +232,7 @@ export class AuthService {
             this.scheduleRefreshToken();
             if (this.options.signInCompleted) await this.options.signInCompleted!();
         } catch {
-            await this.signOut(true);
+            await this.signOut(true, true);
         }
     }
 

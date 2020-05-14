@@ -5,7 +5,6 @@ export interface Configuration {
     appId?: string;
     serverUrl?: string;
     apiToken?: string;
-    refreshTokenTimeSpanSecond?: number;
     defaultLocale?: string;
     supportedLocale?: string[];
     userTypeName?: string;
