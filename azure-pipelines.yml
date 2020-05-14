@@ -31,7 +31,14 @@ steps:
     targetType: 'inline'
     script: |
       $v = [string](Get-Content package.json | ConvertFrom-Json).version
-      Write-Host "##vso[build.updatebuildnumber]$v-$(releaseTag).$(buildCounter)"
+      if ('$(releaseTag)' -eq '')
+      {
+        Write-Host "##vso[build.updatebuildnumber]$v"
+      }
+      else
+      {
+        Write-Host "##vso[build.updatebuildnumber]$v-$(releaseTag).$(buildCounter)"
+      }
 
 - task: CmdLine@2
   displayName: 'Install dependencies'
