@@ -111,6 +111,15 @@ export class ProfileService {
         return undefined;
     }
 
+    async registerUser(member: User, password: string, identityProviderType: string, options?: ApiRequestConfig): Promise<User | undefined> {
+        const request = {
+            user: member,
+            password: password,
+        };
+        const response = await this.apiService.post('api/bds/v1/users/register', request, options);
+        return response.data;
+    }
+
     public async updateLogin(loginRequest: ChangeMeLoginRequest, options?: ApiRequestConfig): Promise<User | undefined> {
         let response = await this.apiService.post('api/bds/v1/users/me/changelogin', loginRequest, options);
         if (response.data) {
