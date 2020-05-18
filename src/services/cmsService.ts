@@ -2,10 +2,11 @@ import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
 import { TranslationService } from './translationService';
 import { Source, ContentType, ContentMapItem, Content } from '../models/Cms';
-import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import { HubConnection } from '@microsoft/signalr';
 import _ from 'lodash';
 import { AuthService } from './authService';
 import { Route } from 'vue-router';
+import { HubService } from './hubService';
 
 export type CmsMode = "DEFAULT" | "NONE" | "LIVE";
 
@@ -40,10 +41,11 @@ export class CmsService {
     private authService: AuthService;
     private configService: ConfigService;
     private translationService: TranslationService;
-    private connection?: HubConnection;
+    private hubService: HubService;
 
-    constructor(apiService: ApiService, authService: AuthService, translationService: TranslationService, configService: ConfigService, options?: CmsOptions) {
+    constructor(apiService: ApiService, authService: AuthService, translationService: TranslationService, configService: ConfigService, hubService: HubService, options?: CmsOptions) {
         this.apiService = apiService;
+        this.hubService = hubService;
         this.authService = authService;
         this.configService = configService;
         this.translationService = translationService;
@@ -62,47 +64,20 @@ export class CmsService {
     public async startLiveUpdate() {
         if (this.store.mode != "LIVE") {
             this.store.mode = "LIVE";
-            await this.startConnection();
+            await this.hubService.connect("CMS.ContentCatalog|" + this.configService.configuration?.appId)
         }
     }
 
     public async stopLiveUpdate() {
         if (this.store.mode == "LIVE") {
-            await this.stopConnection();
+            await this.hubService.disconnect("CMS.ContentCatalog|" + this.configService.configuration?.appId)
             this.store.mode = "DEFAULT";
         }
     }
 
-    public async startConnection(): Promise<HubConnection> {
-        if (!this.connection) {
-            let deviceId = await this.apiService.getDeviceId();
-            this.connection = new HubConnectionBuilder().withUrl(this.configService.configuration!.serverUrl! + "hubs/cms?appId=" + this.configService.configuration?.appId + "&deviceId=" + deviceId, { accessTokenFactory: () => this.authService.getAccessToken()! }).build();
-            this.connection.onclose(() => this.internalStartConnection());
-            await this.internalStartConnection();
-        }
-        return this.connection;
-    }
-
-    public async stopConnection(): Promise<void> {
-        if (this.connection) {
-            let c = this.connection;
-            this.connection = undefined;
-            await c.stop();
-        }
-    }
-
-    private async internalStartConnection(): Promise<void> {
-        if (this.connection && this.connection.state !== HubConnectionState.Connected) {
-            await this.connection.start().then(() => this.connectToCatalog()).catch(() => {
-                return new Promise((resolve, reject) => window.setTimeout(() => this.internalStartConnection().then(resolve).catch(reject), 5000));
-            });
-        }
-    }
-
-    private async connectToCatalog(): Promise<void> {
-        if (this.connection) {
-            await this.connection?.send("AddToApplication");
-            this.connection.on("RefreshCms", (catalogKey: string, group: string) =>
+    async onConnectionCompleted(connection: HubConnection): Promise<void> {
+        if (connection) {
+            connection.on("RefreshCms", (catalogKey: string, group: string) =>
                 this.onRefreshCatalog(catalogKey, group));
         }
     }

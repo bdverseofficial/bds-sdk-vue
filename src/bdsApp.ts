@@ -18,6 +18,8 @@ import { Route } from 'vue-router';
 import { CsService, CsOptions } from './services/csService';
 import { SearchOptions, SearchService } from './services/searchService';
 import { ForumOptions, ForumService } from './services/forumService';
+import { HubService, HubOptions } from './services/hubService';
+import { HubConnection } from '@microsoft/signalr';
 
 export interface BdsAppOptions {
     config?: ConfigOptions;
@@ -37,6 +39,7 @@ export interface BdsAppOptions {
     bds?: BdsOptions;
     title?: string;
     appId?: string;
+    hub?: HubOptions;
 }
 
 export class BdsApp {
@@ -57,6 +60,7 @@ export class BdsApp {
     public translationService: TranslationService;
     public forumService: ForumService;
     public searchService: SearchService;
+    public hubService: HubService;
 
     public title?: string;
 
@@ -77,6 +81,10 @@ export class BdsApp {
         if (!options.router) options.router = {};
         {
             options.router.onBeforeEach = (to: Route, from: Route) => this.onBeforeEach(to, from);
+        }
+        if (!options.hub) options.hub = {};
+        {
+            options.hub.connectionCompleted = (connection: HubConnection) => this.onConnectionCompleted(connection);
         }
         if (!options.profile) options.profile = {};
         {
@@ -109,6 +117,7 @@ export class BdsApp {
         this.profileService = new ProfileService(this.apiService, this.configService, options.profile);
         this.routerService = new RouterService(this.authService, this.profileService, options.router);
         this.translationService = new TranslationService(this.apiService, this.configService, options.translation);
+        this.hubService = new HubService(this.apiService, this.authService, this.configService, options.hub);
         this.searchService = new SearchService(this.configService, this.apiService, options.search);
         this.forumService = new ForumService(this.configService, this.apiService, options.forum);
         this.cmsService = new CmsService(this.apiService, this.authService, this.translationService, this.configService, options.cms);
@@ -123,6 +132,10 @@ export class BdsApp {
 
     public start(mainVue: Vue) {
         this.mainVue = mainVue;
+    }
+
+    protected onConnectionCompleted(connection: HubConnection): Promise<void> {
+        return Promise.resolve();
     }
 
     protected errorHandler(context: string, error: BdsError): Promise<void> {
@@ -190,6 +203,7 @@ export class BdsApp {
         await this.apiService.init();
         await this.profileService.init();
         await this.authService.init();
+        await this.hubService.init();
         await this.cmsService.init();
         await this.chatService.init();
         await this.searchService.init();

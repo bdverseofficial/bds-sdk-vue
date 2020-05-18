@@ -94,6 +94,11 @@ export type ProductOffersResponse = productOffersResponse;
 export type ProductQuantity = productQuantity;
 export type Review = review;
 
+export { HubService } from './services/hubService';
+import { HubOptions as hubOptions, HubStore as hubStore } from './services/hubService';
+export type HubOptions = hubOptions;
+export type HubStore = hubStore;
+
 export { SearchService } from './services/searchService';
 import { SearchOptions as searchOptions, SearchStore as searchStore } from './services/searchService';
 export type SearchOptions = searchOptions;

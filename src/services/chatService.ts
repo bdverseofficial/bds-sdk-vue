@@ -2,9 +2,10 @@ import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Dictionary, Channel, SocUser, Message } from '../models/Soc';
 import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
-import { HubConnection, HubConnectionState, HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnection } from '@microsoft/signalr';
 import _ from 'lodash';
 import { AuthService } from './authService';
+import { HubService } from './hubService';
 
 export interface ChatStore {
     channelKeys: string[];
@@ -35,11 +36,12 @@ export class ChatService {
     private apiService: ApiService;
     private authService: AuthService;
     private configService: ConfigService;
-    private connection?: HubConnection;
     private httpService: AxiosInstance;
+    private hubService: HubService;
 
-    constructor(apiService: ApiService, authService: AuthService, configService: ConfigService, options?: ChatOptions) {
+    constructor(apiService: ApiService, authService: AuthService, configService: ConfigService, hubService: HubService, options?: ChatOptions) {
         this.apiService = apiService;
+        this.hubService = hubService;
         this.configService = configService;
         this.authService = authService;
         this.options = { ...this.options, ...options };
@@ -57,61 +59,25 @@ export class ChatService {
         }
     }
 
-    private async startConnection(): Promise<HubConnection> {
-        if (!this.connection) {
-            let deviceId = await this.apiService.getDeviceId();
-            this.connection = new HubConnectionBuilder().withUrl(this.configService.configuration!.serverUrl! + "hubs/chats?appId=" + this.configService.configuration?.appId + "&deviceId=" + deviceId, { accessTokenFactory: () => this.authService.getAccessToken()! }).build();
-            this.connection.onclose(() => this.internalStartConnection());
-            await this.internalStartConnection();
-        }
-        return this.connection;
-    }
-
-    public async stopConnection(): Promise<void> {
-        if (this.connection) {
-            let c = this.connection;
-            this.connection = undefined;
-            await c.stop();
-        }
-    }
-
     public async clearUser(): Promise<void> {
-        await this.stopConnection();
+        for (let channelKey of this.store.channelKeys) {
+            await this.hubService.disconnect(channelKey);
+        }
         this.store.channelKeys = [];
     }
 
     public async initUser(channelKeys: string[]): Promise<void> {
         this.store.channelKeys = channelKeys;
-        await this.startConnection();
-    }
-
-    private async internalStartConnection(): Promise<void> {
-        if (this.connection && this.connection.state !== HubConnectionState.Connected) {
-            await this.connection.start().then(() => this.connectToChannel()).catch(() => {
-                return new Promise((resolve, reject) => window.setTimeout(() => this.internalStartConnection().then(resolve).catch(reject), 5000));
-            });
+        for (let channelKey of this.store.channelKeys) {
+            await this.hubService.connect(channelKey);
         }
     }
 
-    private async connectToChannel(): Promise<void> {
-        if (this.store.channelKeys && this.connection) {
-            this.store.channelKeys.forEach(async channelKey => {
-                await this.connection?.send("AddToChannel", channelKey);
-            });
-            this.store.users = {};
-            this.connection.on("RefreshChats", (channelKey: string) =>
-                this.onRefreshChanel(channelKey));
-            this.connection.on("UpdateChannel", (channelKey: string) =>
-                this.onUpdateChanel(channelKey));
-            this.store.channels = {};
-            for (let index = 0; index < this.store.channelKeys.length; index++) {
-                let channelKey = this.store.channelKeys[index];
-                let channel = await this.getChannel(channelKey);
-                if (channel) {
-                    this.store.channels[channelKey] = channel;
-                }
-            }
-        }
+    async onConnectionCompleted(connection: HubConnection): Promise<void> {
+        connection.on("RefreshChats", (channelKey: string) =>
+            this.onRefreshChanel(channelKey));
+        connection.on("UpdateChannel", (channelKey: string) =>
+            this.onUpdateChanel(channelKey));
     }
 
     public getChat(channelKey: string): Channel | undefined {
