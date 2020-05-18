@@ -120,8 +120,8 @@ export class BdsApp {
         this.hubService = new HubService(this.apiService, this.authService, this.configService, options.hub);
         this.searchService = new SearchService(this.configService, this.apiService, options.search);
         this.forumService = new ForumService(this.configService, this.apiService, options.forum);
-        this.cmsService = new CmsService(this.apiService, this.authService, this.translationService, this.configService, options.cms);
-        this.chatService = new ChatService(this.apiService, this.authService, this.configService, options.chat);
+        this.cmsService = new CmsService(this.apiService, this.authService, this.translationService, this.configService, this.hubService, options.cms);
+        this.chatService = new ChatService(this.apiService, this.authService, this.configService, this.hubService, options.chat);
         this.blogService = new BlogService(this.apiService, options.blog);
         this.calendarService = new CalendarService(this.apiService, options.calendar);
         this.csService = new CsService(this.configService, this.apiService, options.cs);
