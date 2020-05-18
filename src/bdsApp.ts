@@ -135,6 +135,8 @@ export class BdsApp {
     }
 
     protected onConnectionCompleted(connection: HubConnection): Promise<void> {
+        this.chatService.onConnectionCompleted(connection);
+        this.cmsService.onConnectionCompleted(connection);
         return Promise.resolve();
     }
 
