@@ -25,11 +25,6 @@ export interface CmsOptions {
     cmsQueryKey?: string;
 }
 
-export interface RefreshCmsParameters {
-    CatalogKey?: string;
-    Group?: string;
-}
-
 export class CmsService {
 
     private options: CmsOptions = {
@@ -82,8 +77,8 @@ export class CmsService {
 
     async onConnectionCompleted(connection: HubConnection): Promise<void> {
         if (connection) {
-            connection.on("RefreshCms", (parameters: RefreshCmsParameters) =>
-                this.onRefreshCatalog(parameters.CatalogKey!, parameters.Group!));
+            connection.on("RefreshCms", (catalogKey: string, group: string) =>
+                this.onRefreshCatalog(catalogKey, group));
         }
     }
 
