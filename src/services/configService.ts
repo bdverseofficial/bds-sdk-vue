@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { CmsOptions } from './cmsService';
+import { CsOptions } from './csService';
 
 export interface Configuration {
     appId?: string;
@@ -9,6 +10,7 @@ export interface Configuration {
     supportedLocale?: string[];
     userTypeName?: string;
     cms?: CmsOptions;
+    cs?: CsOptions;
 }
 
 export interface ConfigOptions {

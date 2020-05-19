@@ -1,9 +1,10 @@
 import { Cart, Order, ProductOffersResponse, Review, B2CCustomer } from '../models/Cs';
 import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
-import { SearchEntityResponse } from '../models/Search';
+import { SearchEntityResponse, SearchRequest } from '../models/Search';
 
 export interface CsOptions {
+    priceBookKey?: string;
 }
 
 export interface CsStore {
@@ -24,9 +25,16 @@ export class CsService {
     constructor(configService: ConfigService, apiService: ApiService, options?: CsOptions) {
         this.apiService = apiService;
         this.configService = configService;
+        this.options = { ...this.options, ...options };
     }
 
     public async init() {
+        if (this.configService.configuration) {
+            let configCs = this.configService.configuration.cs;
+            if (configCs) {
+                this.options = { ...this.options, ...configCs };
+            }
+        }
     }
 
     public async initUser() {
@@ -51,8 +59,8 @@ export class CsService {
         this.store.cart = (await this.removeLineFromCartApi(lineNumber)) || undefined;
     }
 
-    public async addLineToCart(productOffersId: string, quantity: number, offerId?: string) {
-        this.store.cart = (await this.addLineToCartApi(productOffersId, quantity, offerId)) || undefined;
+    public async addLineToCart(productOffersKey: string, quantity: number, offerId?: string) {
+        this.store.cart = (await this.addLineToCartApi(productOffersKey, quantity, offerId)) || undefined;
     }
 
     public async updateLineFromCart(lineNumber: string, newQuantity: number) {
@@ -65,15 +73,15 @@ export class CsService {
         return order;
     }
 
-    public async getProductOffers(productOffersId: string): Promise<ProductOffersResponse | null> {
-        return await this.getProductOffersApi(productOffersId);
+    public async getProductOffers(productOffersKey: string): Promise<ProductOffersResponse | null> {
+        return await this.getProductOffersApi(productOffersKey);
     }
 
-    public async getProductOffersReviews(productOffersId: string, limit: number, scrollId?: string): Promise<Review[] | null> {
-        return await this.getProductOffersReviewsApi(productOffersId, limit, scrollId);
+    public async getProductOffersReviews(productOffersKey: string, limit: number, scrollId?: string): Promise<Review[] | null> {
+        return await this.getProductOffersReviewsApi(productOffersKey, limit, scrollId);
     }
 
-    public async searchCatalog(request: any): Promise<SearchEntityResponse | null> {
+    public async searchCatalog(request: SearchRequest): Promise<SearchEntityResponse | null> {
         let options = {
             headers: {
                 filters: [
@@ -91,7 +99,7 @@ export class CsService {
         return await this.searchCatalogApi(request, options);
     }
 
-    public async getMainNavigation(request: any): Promise<SearchEntityResponse | null> {
+    public async getMainNavigation(request: SearchRequest): Promise<SearchEntityResponse | null> {
         return await this.getMainNavigationApi(request);
     }
 
@@ -99,16 +107,16 @@ export class CsService {
         return await this.getOrdersApi(limit, scrollId);
     }
 
-    public async getOrder(orderId: string): Promise<Order | null> {
-        return await this.getOrderApi(orderId);
+    public async getOrder(orderKey: string): Promise<Order | null> {
+        return await this.getOrderApi(orderKey);
     }
 
-    private async getMainNavigationApi(request: any, options?: ApiRequestConfig): Promise<SearchEntityResponse | null> {
+    private async getMainNavigationApi(request: SearchRequest, options?: ApiRequestConfig): Promise<SearchEntityResponse | null> {
         if (request) {
-            if (this.configService.configuration) {
+            if (this.options.priceBookKey) {
                 let response = await this.apiService.post(
                     "api/cs/v1/b2c/" +
-                    (this.configService.configuration as any).catalogId +
+                    this.options.priceBookKey +
                     "/navigation",
                     request,
                     options
@@ -121,10 +129,10 @@ export class CsService {
 
     private async searchCatalogApi(request: any, options?: ApiRequestConfig): Promise<SearchEntityResponse | null> {
         if (request) {
-            if (this.configService.configuration) {
+            if (this.options.priceBookKey) {
                 let response = await this.apiService.post(
                     "api/cs/v1/b2c/" +
-                    (this.configService.configuration as any).catalogId +
+                    this.options.priceBookKey +
                     "/search",
                     request,
                     options
@@ -135,10 +143,10 @@ export class CsService {
         return null;
     }
 
-    private async getProductOffersReviewsApi(productOffersId: string, limit: number, scrollId?: string, options?: ApiRequestConfig): Promise<Review[] | null> {
-        if (productOffersId) {
+    private async getProductOffersReviewsApi(productOffersKey: string, limit: number, scrollId?: string, options?: ApiRequestConfig): Promise<Review[] | null> {
+        if (productOffersKey) {
             let response = await this.apiService.get(
-                "api/cs/v1/b2c/product/" + productOffersId + "/reviews",
+                "api/cs/v1/b2c/product/" + productOffersKey + "/reviews",
                 { ...options, params: { limit: limit, scrollId: scrollId } }
             );
             return response.data;
@@ -146,10 +154,10 @@ export class CsService {
         return null;
     }
 
-    private async getProductOffersApi(productOffersId: string, options?: ApiRequestConfig): Promise<ProductOffersResponse | null> {
-        if (productOffersId) {
+    private async getProductOffersApi(productOffersKey: string, options?: ApiRequestConfig): Promise<ProductOffersResponse | null> {
+        if (productOffersKey) {
             let response = await this.apiService.get(
-                "api/cs/v1/b2c/product/" + productOffersId,
+                "api/cs/v1/b2c/product/" + productOffersKey,
                 options
             );
             return response.data;
@@ -158,9 +166,9 @@ export class CsService {
     }
 
     private async getCartApi(options?: ApiRequestConfig): Promise<Cart | null> {
-        if (this.configService.configuration) {
+        if (this.options.priceBookKey) {
             let response = await this.apiService.get(
-                "api/cs/v1/b2c/" + (this.configService.configuration as any).catalogId + "/cart",
+                "api/cs/v1/b2c/" + this.options.priceBookKey + "/cart",
                 options
             );
             return response.data;
@@ -168,15 +176,15 @@ export class CsService {
         return null;
     }
 
-    private async addLineToCartApi(productOffersId: string, quantity: number, offerId?: string, options?: ApiRequestConfig): Promise<Cart | null> {
+    private async addLineToCartApi(productOffersKey: string, quantity: number, offerId?: string, options?: ApiRequestConfig): Promise<Cart | null> {
         if (this.store.cart) {
             let request = {
-                productOffersId: productOffersId,
+                productOffersKey: productOffersKey,
                 quantity: quantity,
                 offerId: offerId,
             };
             let response = await this.apiService.put(
-                "api/cs/v1/b2c/" + this.store.cart.id + "/cart/",
+                "api/cs/v1/b2c/" + this.store.cart.key + "/cart/",
                 request,
                 options
             );
@@ -191,7 +199,7 @@ export class CsService {
                 quantity: quantity
             };
             let response = await this.apiService.post(
-                "api/cs/v1/b2c/" + this.store.cart.id + "/cart/" + lineNumber,
+                "api/cs/v1/b2c/" + this.store.cart.key + "/cart/" + lineNumber,
                 request,
                 options
             );
@@ -206,7 +214,7 @@ export class CsService {
                 paymentData: paymentData
             };
             let response = await this.apiService.put(
-                "api/cs/v1/b2c/" + this.store.cart.id + "/order",
+                "api/cs/v1/b2c/" + this.store.cart.key + "/order",
                 request,
                 options
             );
@@ -218,7 +226,7 @@ export class CsService {
     private async removeLineFromCartApi(lineNumber: string, options?: ApiRequestConfig): Promise<Cart | null> {
         if (this.store.cart) {
             let response = await this.apiService.delete(
-                "api/cs/v1/b2c/" + this.store.cart.id + "/cart/" + lineNumber,
+                "api/cs/v1/b2c/" + this.store.cart.key + "/cart/" + lineNumber,
                 options
             );
             return response.data;
@@ -227,9 +235,9 @@ export class CsService {
     }
 
     private async getOrdersApi(limit: number, scrollId?: string, options?: ApiRequestConfig): Promise<Order[] | null> {
-        if (this.configService.configuration) {
+        if (this.options.priceBookKey) {
             let response = await this.apiService.get(
-                "api/cs/v1/b2c/" + (this.configService.configuration as any).catalogId + "/orders",
+                "api/cs/v1/b2c/" + this.options.priceBookKey + "/orders",
                 { ...options, params: { limit: limit, scrollId: scrollId } }
             );
             return response.data;
@@ -237,9 +245,9 @@ export class CsService {
         return null;
     }
 
-    private async getOrderApi(orderId: string, options?: ApiRequestConfig): Promise<Order | null> {
+    private async getOrderApi(orderKey: string, options?: ApiRequestConfig): Promise<Order | null> {
         let response = await this.apiService.get(
-            "api/cs/v1/b2c/" + orderId + "/order",
+            "api/cs/v1/b2c/" + orderKey + "/order",
             options
         );
         return response.data;
