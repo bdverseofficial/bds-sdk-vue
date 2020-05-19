@@ -1,7 +1,7 @@
 import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
 import { TranslationService } from './translationService';
-import { Source, ContentType, ContentMapItem, Content } from '../models/Cms';
+import { Source, ContentType, ContentMapItem, Content, ContentCatalog } from '../models/Cms';
 import { HubConnection } from '@microsoft/signalr';
 import _ from 'lodash';
 import { AuthService } from './authService';
@@ -42,6 +42,7 @@ export class CmsService {
     private configService: ConfigService;
     private translationService: TranslationService;
     private hubService: HubService;
+    private catalog: ContentCatalog | null = null;
 
     constructor(apiService: ApiService, authService: AuthService, translationService: TranslationService, configService: ConfigService, hubService: HubService, options?: CmsOptions) {
         this.apiService = apiService;
@@ -59,18 +60,23 @@ export class CmsService {
                 this.options = { ...this.options, ...configCms };
             }
         }
+        this.getCatalog().then(c => this.catalog = c);
     }
 
     public async startLiveUpdate() {
         if (this.store.mode != "LIVE") {
             this.store.mode = "LIVE";
-            await this.hubService.connect("CMS.ContentCatalog|" + this.configService.configuration?.appId)
+            if (this.catalog?.key) {
+                await this.hubService.connect(this.catalog.key);
+            }
         }
     }
 
     public async stopLiveUpdate() {
         if (this.store.mode == "LIVE") {
-            await this.hubService.disconnect("CMS.ContentCatalog|" + this.configService.configuration?.appId)
+            if (this.catalog?.key) {
+                await this.hubService.disconnect(this.catalog.key)
+            }
             this.store.mode = "DEFAULT";
         }
     }
@@ -179,6 +185,12 @@ export class CmsService {
 
     private async getApiContentMap(group: string, options?: ApiRequestConfig): Promise<ContentMapItem[] | null> {
         let response = await this.apiService.get("api/cms/v1/map/" + group, options);
+        if (response) return response.data;
+        return null;
+    }
+
+    public async getCatalog(options?: ApiRequestConfig): Promise<ContentCatalog | null> {
+        let response = await this.apiService.get("api/cms/v1/content/catalog", options);
         if (response) return response.data;
         return null;
     }

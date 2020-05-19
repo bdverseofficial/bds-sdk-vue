@@ -124,10 +124,11 @@ import { CalendarOptions as calendarOptions, CalendarStore as calendarStore } fr
 export type CalendarOptions = calendarOptions;
 export type CalendarStore = calendarStore;
 
-import { ContentType as contentType, Content as content, Source as source } from './models/Cms';
+import { ContentType as contentType, Content as content, ContentCatalog as contentCatalog, Source as source } from './models/Cms';
 export type Content = content;
 export type Source = source;
 export type ContentType = contentType;
+export type ContentCatalog = contentCatalog;
 
 import { CmsOptions as cmsOptions, CmsStore as cmsStore } from './services/cmsService';
 export { CmsService } from './services/cmsService';

@@ -1,5 +1,9 @@
 import { BdsEntity } from './BdsEntity';
 import { Reference } from './Reference';
+import { Group } from './Group';
+
+export interface ContentCatalog extends Group {
+}
 
 export interface Content extends BdsEntity {
     value?: string;
