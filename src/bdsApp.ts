@@ -206,6 +206,7 @@ export class BdsApp {
         await this.profileService.init();
         await this.authService.init();
         await this.hubService.init();
+        await this.csService.init();
         await this.cmsService.init();
         await this.chatService.init();
         await this.searchService.init();
