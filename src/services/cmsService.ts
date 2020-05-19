@@ -60,7 +60,7 @@ export class CmsService {
                 this.options = { ...this.options, ...configCms };
             }
         }
-        this.getCatalog().then(c => this.catalog = c);
+        this.catalog = await this.getCatalog();
     }
 
     public async startLiveUpdate() {
@@ -190,7 +190,7 @@ export class CmsService {
     }
 
     public async getCatalog(options?: ApiRequestConfig): Promise<ContentCatalog | null> {
-        let response = await this.apiService.get("api/cms/v1/content/catalog", options);
+        let response = await this.apiService.get("api/cms/v1/catalog", options);
         if (response) return response.data;
         return null;
     }
