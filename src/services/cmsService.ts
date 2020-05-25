@@ -274,8 +274,8 @@ export class CmsService {
     }
 
     private async loadRemoteContent(group: string, type: ContentType, name: string): Promise<string | null> {
-        if (type && name && group && this.options.remotePath) {
-            let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.options.catalogKey;
+        if (type && name && group && this.options.remotePath && this.options.catalogKey) {
+            let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.escapeFileNameAndPath(this.options.catalogKey);
             return await this.loadContentPath(type, remotePath, group, name);
         }
         return null;
@@ -328,19 +328,19 @@ export class CmsService {
     }
 
     private async getRemoteContentMap(group: string): Promise<ContentMapItem[] | null> {
-        if (group && this.options.remotePath) {
-            let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.options.catalogKey;
+        if (group && this.options.remotePath && this.options.catalogKey) {
+            let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.escapeFileNameAndPath(this.options.catalogKey);
             return await this.loadContentMap(remotePath, group);
         }
         return null;
     }
 
     private async loadGroupRemoteContent(group: string): Promise<string[] | null> {
-        if (group && this.options.remotePath) {
+        if (group && this.options.remotePath && this.options.catalogKey) {
             let map = await this.getRemoteContentMap(group);
             if (map) {
                 map = _.orderBy(map, m => { return m.order ?? 0 });
-                let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.options.catalogKey;
+                let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.escapeFileNameAndPath(this.options.catalogKey);
                 let contents = [];
                 for (let item of map) {
                     if (item.name && item.contentType) {
@@ -360,9 +360,8 @@ export class CmsService {
         root: string,
         group: string
     ): Promise<ContentMapItem[] | null> {
-        let fullPath = root + (root.endsWith("/") ? "" : "/") + group + "/maps.json";
+        let fullPath = root + (root.endsWith("/") ? "" : "/") + this.escapeFileNameAndPath(group + "/maps.json");
         try {
-            fullPath = this.escapeFileNameAndPath(fullPath);
             let response = await this.apiService.get(fullPath, {
                 baseURL: "/"
             });
@@ -415,9 +414,8 @@ export class CmsService {
         group: string,
         name: string
     ): Promise<string | null> {
-        let fullPath = root + (root.endsWith("/") ? "" : "/") + group + "/" + language + "." + name + "." + this.getExtension(type);
+        let fullPath = root + (root.endsWith("/") ? "" : "/") + this.escapeFileNameAndPath(group + "/" + language + "." + name + "." + this.getExtension(type));
         try {
-            fullPath = this.escapeFileNameAndPath(fullPath);
             let response = await this.apiService.get(fullPath, {
                 baseURL: "/",
                 transformResponse: (d) => d,
