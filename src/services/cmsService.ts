@@ -189,7 +189,7 @@ export class CmsService {
         options = {
             ...options,
             headers: {
-                filters: [
+                Filters: [
                     "CMS.Content:key|id|value|contentType|order"
                 ].join(",")
             }

@@ -106,7 +106,7 @@ export class ApiService {
         this.httpService.defaults.baseURL = this.configService.configuration?.serverUrl;
         this.httpService.defaults.headers.common['AppId'] = this.configService.configuration?.appId;
         this.httpService.defaults.headers.common['DeviceId'] = await this.getDeviceId();
-        if (this.options.applyTranslation) this.httpService.defaults.headers.common['translation'] = true;
+        if (this.options.applyTranslation) this.httpService.defaults.headers.common['Translation'] = true;
     }
 
     public post(url: string, data?: any, config?: ApiRequestConfig): Promise<AxiosResponse<any>> {

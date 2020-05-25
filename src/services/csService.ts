@@ -84,7 +84,7 @@ export class CsService {
     public async searchCatalog(request: SearchRequest): Promise<SearchEntityResponse | null> {
         let options = {
             headers: {
-                filters: [
+                Filters: [
                     "Facet:name|localName",
                     "FacetValue:name|localName",
                     "PIM.Category:name|localName",

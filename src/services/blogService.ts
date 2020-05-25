@@ -26,7 +26,7 @@ export class BlogService {
         options = {
             ...options,
             headers: {
-                filters: [
+                Filters: [
                     "SOC.BlogPost:key|id|meta|title|fullAvatar"
                 ].join(",")
             }

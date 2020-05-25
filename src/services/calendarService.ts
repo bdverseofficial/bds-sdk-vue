@@ -26,7 +26,7 @@ export class CalendarService {
         options = {
             ...options,
             headers: {
-                filters: [
+                Filters: [
                     "SOC.CalendarItem:key|id|meta|title|fullAvatar|startDate|endDate|allDay"
                 ].join(",")
             }

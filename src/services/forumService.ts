@@ -56,7 +56,7 @@ export class ForumService {
         options = {
             ...options,
             headers: {
-                filters: [
+                Filters: [
                     "SOC.BlogPost:key|id|meta|title|fullAvatar"
                 ].join(",")
             }
@@ -105,7 +105,7 @@ export class ForumService {
     public async searchForum(request: any): Promise<SearchEntityResponse | null> {
         let options = {
             headers: {
-                filters: [
+                Filters: [
                     "Facet:name|localName",
                     "FacetValue:name|localName",
                 ].join(",")
