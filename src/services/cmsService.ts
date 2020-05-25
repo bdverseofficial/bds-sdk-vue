@@ -401,7 +401,6 @@ export class CmsService {
 
     private escapeFileNameAndPath(fileName: string): string {
         let result = fileName.split("/").map(p => this.escapeFileNamePart(p)).join("/");
-        console.log(result);
         return result;
     }
 
