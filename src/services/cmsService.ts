@@ -23,6 +23,7 @@ export interface CmsOptions {
     convertContent?: (type: ContentType, value: string) => string;
     onCatalogChanged?: (catalogKey: string, group: string) => Promise<void>;
     cmsQueryKey?: string;
+    catalogKey?: string;
 }
 
 export class CmsService {
@@ -37,12 +38,12 @@ export class CmsService {
         onCatalogChanged: (catalogKey: string) => Promise.resolve(),
     };
 
+    private regExp: RegExp = /[/\\?%*:|"<>]/g;
     private apiService: ApiService;
     private authService: AuthService;
     private configService: ConfigService;
     private translationService: TranslationService;
     private hubService: HubService;
-    private catalog: ContentCatalog | null = null;
 
     constructor(apiService: ApiService, authService: AuthService, translationService: TranslationService, configService: ConfigService, hubService: HubService, options?: CmsOptions) {
         this.apiService = apiService;
@@ -60,24 +61,19 @@ export class CmsService {
                 this.options = { ...this.options, ...configCms };
             }
         }
-        this.catalog = await this.getCatalog();
     }
 
     public async startLiveUpdate() {
-        if (this.store.mode != "LIVE") {
-            this.store.mode = "LIVE";
-            if (this.catalog?.key) {
-                await this.hubService.connect(this.catalog.key);
-            }
+        this.store.mode = "LIVE";
+        if (this.options.catalogKey) {
+            await this.hubService.connect(this.options.catalogKey);
         }
     }
 
     public async stopLiveUpdate() {
-        if (this.store.mode == "LIVE") {
-            if (this.catalog?.key) {
-                await this.hubService.disconnect(this.catalog.key)
-            }
-            this.store.mode = "DEFAULT";
+        if (this.store.mode === "LIVE") this.store.mode = "DEFAULT";
+        if (this.options.catalogKey) {
+            await this.hubService.disconnect(this.options.catalogKey)
         }
     }
 
@@ -184,18 +180,12 @@ export class CmsService {
     }
 
     private async getApiContentMap(group: string, options?: ApiRequestConfig): Promise<ContentMapItem[] | null> {
-        let response = await this.apiService.get("api/cms/v1/map/" + group, options);
+        let response = await this.apiService.get("api/cms/v1/" + this.options.catalogKey + "/map/" + group, options);
         if (response) return response.data;
         return null;
     }
 
-    public async getCatalog(options?: ApiRequestConfig): Promise<ContentCatalog | null> {
-        let response = await this.apiService.get("api/cms/v1/catalog", options);
-        if (response) return response.data;
-        return null;
-    }
-
-    private async getContentByName(group: string, name: string, options?: ApiRequestConfig): Promise<Content | null> {
+    private async getApiContentByName(group: string, name: string, options?: ApiRequestConfig): Promise<Content | null> {
         options = {
             ...options,
             headers: {
@@ -204,15 +194,16 @@ export class CmsService {
                 ].join(",")
             }
         };
-        let response = await this.apiService.get("api/cms/v1/content/" + group + "/" + name, options);
+        let response = await this.apiService.get("api/cms/v1/" + this.options.catalogKey + "/content/" + group + "/" + name, options);
         if (response) return response.data;
         return null;
     }
 
-    public async onBeforeEach(to: Route, from: Route): Promise<void> {
-        if (this.options.cmsQueryKey) {
-            let mode = to.query[this.options.cmsQueryKey];
+    public async onRouteChange(query: any): Promise<void> {
+        if (this.options.cmsQueryKey && query) {
+            let mode = query[this.options.cmsQueryKey];
             mode = (mode || "DEFAULT").toString().toUpperCase();
+            this.store.mode = mode as CmsMode;
             switch (mode) {
                 case "LIVE":
                     {
@@ -222,7 +213,6 @@ export class CmsService {
                 default:
                     {
                         await this.stopLiveUpdate();
-                        this.store.mode = mode as CmsMode;
                     }
                     break;
             }
@@ -285,7 +275,7 @@ export class CmsService {
 
     private async loadRemoteContent(group: string, type: ContentType, name: string): Promise<string | null> {
         if (type && name && group && this.options.remotePath) {
-            let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.configService.configuration?.appId;
+            let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.options.catalogKey;
             return await this.loadContentPath(type, remotePath, group, name);
         }
         return null;
@@ -312,7 +302,7 @@ export class CmsService {
     private async loadApiContent(group: string, type: ContentType, name: string): Promise<string | null> {
         if (name && group) {
             try {
-                let content = await this.getContentByName(
+                let content = await this.getApiContentByName(
                     group,
                     name
                 );
@@ -339,7 +329,7 @@ export class CmsService {
 
     private async getRemoteContentMap(group: string): Promise<ContentMapItem[] | null> {
         if (group && this.options.remotePath) {
-            let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.configService.configuration?.appId;
+            let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.options.catalogKey;
             return await this.loadContentMap(remotePath, group);
         }
         return null;
@@ -350,7 +340,7 @@ export class CmsService {
             let map = await this.getRemoteContentMap(group);
             if (map) {
                 map = _.orderBy(map, m => { return m.order ?? 0 });
-                let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.configService.configuration?.appId;
+                let remotePath = this.options.remotePath + (this.options.remotePath.endsWith("/") ? "" : "/") + this.options.catalogKey;
                 let contents = [];
                 for (let item of map) {
                     if (item.name && item.contentType) {
@@ -372,6 +362,7 @@ export class CmsService {
     ): Promise<ContentMapItem[] | null> {
         let fullPath = root + (root.endsWith("/") ? "" : "/") + group + "/maps.json";
         try {
+            fullPath = this.escapeFileNameAndPath(fullPath);
             let response = await this.apiService.get(fullPath, {
                 baseURL: "/"
             });
@@ -408,6 +399,16 @@ export class CmsService {
         return content;
     }
 
+    private escapeFileNameAndPath(fileName: string): string {
+        let result = fileName.split("/").map(p => this.escapeFileNamePart(p)).join("/");
+        console.log(result);
+        return result;
+    }
+
+    private escapeFileNamePart(part: string): string {
+        return part.replace(this.regExp, "_");
+    }
+
     private async loadContentForLanguage(
         language: string,
         type: ContentType,
@@ -417,6 +418,7 @@ export class CmsService {
     ): Promise<string | null> {
         let fullPath = root + (root.endsWith("/") ? "" : "/") + group + "/" + language + "." + name + "." + this.getExtension(type);
         try {
+            fullPath = this.escapeFileNameAndPath(fullPath);
             let response = await this.apiService.get(fullPath, {
                 baseURL: "/",
                 transformResponse: (d) => d,

@@ -81,6 +81,7 @@ export class BdsApp {
         if (!options.router) options.router = {};
         {
             options.router.onBeforeEach = (to: Route, from: Route) => this.onBeforeEach(to, from);
+            options.router.onAfterEach = (route: Route) => this.onAfterEach(route);
         }
         if (!options.hub) options.hub = {};
         {
@@ -154,13 +155,13 @@ export class BdsApp {
     }
 
     protected async onBeforeEach(to: Route, from: Route): Promise<void> {
-        await this.cmsService.onBeforeEach(to, from);
+    }
+
+    protected async onAfterEach(route: Route): Promise<void> {
+        await this.cmsService.onRouteChange(route.query);
     }
 
     protected async onProfileChanged(): Promise<void> {
-        // if (this.profileService.store.me && this.profileService.store.me.culture) {
-        //     await this.setLocale(this.profileService.store.me.culture.id);
-        // }
     }
 
     protected async onCatalogChanged(catalogKey: string, group: string): Promise<void> {

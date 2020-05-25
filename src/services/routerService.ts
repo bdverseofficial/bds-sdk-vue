@@ -15,6 +15,7 @@ export interface RouterOptions {
     loginPage?: string;
     otherRoute?: RouteConfig;
     onBeforeEach?: (to: Route, from: Route) => Promise<void>;
+    onAfterEach?: (route: Route) => Promise<void>;
 }
 
 interface InitialRoute {
@@ -65,11 +66,14 @@ export class RouterService {
             },
             routes: this.options.routes,
         });
-        this.router.beforeEach((to, from, next) => {
+        this.router.beforeEach(async (to, from, next) => {
             if (this.escapeRoute(to)) {
                 next({ name: to.name!, hash: to.hash, params: to.params, query: to.query!, path: to.path });
             }
-            this.manageAuthGuard({ to: to, from: from, next: next });
+            await this.manageAuthGuard({ to: to, from: from, next: next });
+        });
+        this.router.afterEach(async (to, from) => {
+            if (this.options.onAfterEach) await this.options.onAfterEach(this.router.currentRoute);
         });
     }
 

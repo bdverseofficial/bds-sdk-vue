@@ -72,22 +72,26 @@ export class HubService {
     }
 
     public async connect(entityKey: string) {
-        if (this.connection) {
-            await this.connection.send("Connect", entityKey);
-        }
-        this.entities.push(entityKey);
-        if (!this.connection && this.entities.length > 0) {
-            await this.startConnection();
+        if (this.entities.indexOf(entityKey) === -1) {
+            this.entities.push(entityKey);
+            if (this.connection) {
+                await this.connection.send("Connect", entityKey);
+            }
+            if (!this.connection && this.entities.length > 0) {
+                await this.startConnection();
+            }
         }
     }
 
     public async disconnect(entityKey: string) {
-        if (this.connection) {
-            await this.connection.send("Disconnect", entityKey);
-        }
-        this.entities = this.entities.filter(e => e != entityKey);
-        if (!this.connection && this.entities.length == 0) {
-            await this.stopConnection();
+        if (this.entities.indexOf(entityKey) !== -1) {
+            this.entities = this.entities.filter(e => e != entityKey);
+            if (this.connection) {
+                await this.connection.send("Disconnect", entityKey);
+            }
+            if (!this.connection && this.entities.length == 0) {
+                await this.stopConnection();
+            }
         }
     }
 
