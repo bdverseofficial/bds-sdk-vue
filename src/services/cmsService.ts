@@ -234,6 +234,7 @@ export class CmsService {
                 for (let item of map) {
                     if (item.content) {
                         let content = await this.loadApiContentKey(item.content.key!);
+                        console.log(content);
                         if (content) {
                             contents.push(content);
                         }
@@ -295,6 +296,7 @@ export class CmsService {
             if (this.options.convertContent) {
                 value = this.options.convertContent(content.contentType! as ContentType, value!);
             }
+            return value;
         }
         return null;
     }
