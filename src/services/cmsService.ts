@@ -234,7 +234,6 @@ export class CmsService {
                 for (let item of map) {
                     if (item.content) {
                         let content = await this.loadApiContentKey(item.content.key!);
-                        console.log(content);
                         if (content) {
                             contents.push(content);
                         }
