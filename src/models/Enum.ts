@@ -3,3 +3,8 @@ export interface EnumValue {
     code?: string;
     value?: unknown;
 }
+
+export interface EnumType {
+    name?: string;
+    values?: EnumValue[];
+}
