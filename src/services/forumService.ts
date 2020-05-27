@@ -1,7 +1,7 @@
 import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
 import { Thread, Topic, Post } from '../models/Soc';
-import { SearchEntityResponse } from '../models/Search';
+import { SearchEntityResponse, SearchEntityRequest } from '../models/Search';
 
 export interface ForumOptions {
 }
@@ -25,7 +25,7 @@ export class ForumService {
         this.configService = configService;
     }
 
-    public async init() {
+    public async init(): Promise<void> {
     }
 
     public async getTopics(limit: number, scrollId?: string, options?: ApiRequestConfig): Promise<Topic[] | null> {
@@ -102,7 +102,7 @@ export class ForumService {
         return null;
     }
 
-    public async searchForum(request: any): Promise<SearchEntityResponse | null> {
+    public async searchForum(request: SearchEntityRequest): Promise<SearchEntityResponse | null> {
         let options = {
             headers: {
                 Filters: [

@@ -7,6 +7,7 @@ import _ from 'lodash';
 import { AuthService } from './authService';
 import { Route } from 'vue-router';
 import { HubService } from './hubService';
+import { Dictionary } from 'vue-router/types/router';
 
 export type CmsMode = "DEFAULT" | "NONE" | "LIVE";
 
@@ -63,14 +64,14 @@ export class CmsService {
         }
     }
 
-    public async startLiveUpdate() {
+    public async startLiveUpdate(): Promise<void> {
         this.store.mode = "LIVE";
         if (this.options.catalogKey) {
             await this.hubService.connect(this.options.catalogKey);
         }
     }
 
-    public async stopLiveUpdate() {
+    public async stopLiveUpdate(): Promise<void> {
         if (this.store.mode === "LIVE") this.store.mode = "DEFAULT";
         if (this.options.catalogKey) {
             await this.hubService.disconnect(this.options.catalogKey)
@@ -199,7 +200,7 @@ export class CmsService {
         return null;
     }
 
-    public async onRouteChange(query: any): Promise<void> {
+    public async onRouteChange(query: Dictionary<string | (string | null)[]>): Promise<void> {
         if (this.options.cmsQueryKey && query) {
             let mode = query[this.options.cmsQueryKey];
             mode = (mode || "DEFAULT").toString().toUpperCase();

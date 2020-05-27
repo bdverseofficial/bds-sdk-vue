@@ -77,38 +77,38 @@ export class RouterService {
         });
     }
 
-    public home() {
+    public home(): void {
         this.push(this.options.homePage!);
     }
 
-    public push(route: RawLocation) {
+    public push(route: RawLocation): void {
         if (!route) route = this.options.homePage!;
         this.router.push(route);
     }
 
-    public updateQuery(query: Dictionary<string | (string | null)[] | null | undefined>) {
+    public updateQuery(query: Dictionary<string | (string | null)[] | null | undefined>): void {
         this.replace({ query: query });
     }
 
-    public updateParams(params: Dictionary<string>) {
+    public updateParams(params: Dictionary<string>): void {
         this.replace({ params: params });
     }
 
-    public login(url?: string) {
+    public login(url?: string): void {
         url = url || this.options.homePage;
         this.replace({ path: this.options.loginPage, query: { url: url } });
     }
 
-    public replace(route?: RawLocation) {
+    public replace(route?: RawLocation): void {
         route = route || this.options.homePage;
         this.router.replace(route!);
     }
 
-    public back() {
+    public back(): void {
         this.router.back();
     }
 
-    public resume() {
+    public resume(): void {
         this.pause = false;
         if (this.initialRoute) {
             this.manageAuthGuard({ to: this.initialRoute.to, from: this.initialRoute.route, next: this.initialRoute.next });
@@ -116,7 +116,7 @@ export class RouterService {
         }
     }
 
-    public redirectToLoginIfNeeded() {
+    public redirectToLoginIfNeeded(): void {
         if (this.router && this.router.currentRoute) {
             let meta = this.getMeta(this.router.currentRoute);
             if (meta) {
@@ -128,7 +128,7 @@ export class RouterService {
         }
     }
 
-    private getMeta(to: Route) {
+    private getMeta(to: Route): any {
         if (to && to.matched) {
             let meta = to.matched.reduce((total: any, route: RouteRecord) => {
                 if (!total && !route.meta) return null;
@@ -141,7 +141,7 @@ export class RouterService {
         return null;
     }
 
-    private async manageAuthGuard(initialRoute: InitialRoute) {
+    private async manageAuthGuard(initialRoute: InitialRoute): Promise<void> {
         if (!this.pause) {
             if (initialRoute.to && initialRoute.to.matched) {
                 let meta = this.getMeta(initialRoute.to);
@@ -171,7 +171,7 @@ export class RouterService {
         }
     }
 
-    private injectProps(routes: RouteConfig[]) {
+    private injectProps(routes: RouteConfig[]): void {
         if (routes) {
             routes.forEach((r) => {
                 if (!r.props) r.props = (route) => this.unEscapeRouteParams(route);
@@ -182,7 +182,7 @@ export class RouterService {
         }
     }
 
-    private escapeRoute(route: Route) {
+    private escapeRoute(route: Route): boolean {
         let changed = false;
         if (route.params) {
             for (let paramKey in route.params) {
@@ -203,7 +203,7 @@ export class RouterService {
         return changed;
     }
 
-    private unEscapeRouteParams(route: Route) {
+    private unEscapeRouteParams(route: Route): any {
         let params: any = {};
         if (route.params) {
             for (let paramKey in route.params) {
@@ -220,14 +220,14 @@ export class RouterService {
         return params;
     }
 
-    private escapeUrlParameters(fragment: any) {
+    private escapeUrlParameters(fragment: any): any {
         if (fragment && typeof fragment === 'string') {
             // fragment = fragment.replace(/\./g, '_dot_');
         }
         return fragment;
     }
 
-    private unEscapeUrlParameters(fragment: any) {
+    private unEscapeUrlParameters(fragment: any): any {
         if (fragment && typeof fragment === 'string') {
             // fragment = fragment.replace(/_dot_/g, '.');
         }

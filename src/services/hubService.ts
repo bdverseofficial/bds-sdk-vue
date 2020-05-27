@@ -31,7 +31,7 @@ export class HubService {
         this.options = { ...this.options, ...options };
     }
 
-    public async init() {
+    public async init(): Promise<void> {
     }
 
     private async startConnection(): Promise<HubConnection> {
@@ -71,7 +71,7 @@ export class HubService {
         }
     }
 
-    public async connect(entityKey: string) {
+    public async connect(entityKey: string): Promise<void> {
         if (this.entities.indexOf(entityKey) === -1) {
             this.entities.push(entityKey);
             if (this.connection) {
@@ -83,7 +83,7 @@ export class HubService {
         }
     }
 
-    public async disconnect(entityKey: string) {
+    public async disconnect(entityKey: string): Promise<void> {
         if (this.entities.indexOf(entityKey) !== -1) {
             this.entities = this.entities.filter(e => e != entityKey);
             if (this.connection) {
@@ -95,7 +95,7 @@ export class HubService {
         }
     }
 
-    public async sendMessage(entityKey: string, methodName: string, parameters: any) {
+    public async sendMessage(entityKey: string, methodName: string, parameters: unknown): Promise<void> {
         if (this.connection) {
             await this.connection.send("Message", entityKey, methodName, parameters);
         }

@@ -30,7 +30,7 @@ export class ConfigService {
         this.options = { ...this.options, ...options };
     }
 
-    public async init() {
+    public async init(): Promise<void> {
         if (!this.options.configuration) {
             await axios.create().get(this.options.configPath!).then((response) => { this.configuration = response.data });
         }

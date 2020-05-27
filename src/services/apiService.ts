@@ -98,18 +98,18 @@ export class ApiService {
         return deviceId;
     }
 
-    public setDefaultLocale(lang: string) {
+    public setDefaultLocale(lang: string): void {
         this.httpService.defaults.headers.common['Accept-Language'] = lang;
     }
 
-    public async init() {
+    public async init(): Promise<void> {
         this.httpService.defaults.baseURL = this.configService.configuration?.serverUrl;
         this.httpService.defaults.headers.common['AppId'] = this.configService.configuration?.appId;
         this.httpService.defaults.headers.common['DeviceId'] = await this.getDeviceId();
         if (this.options.applyTranslation) this.httpService.defaults.headers.common['Translation'] = true;
     }
 
-    public post(url: string, data?: any, config?: ApiRequestConfig): Promise<AxiosResponse<any>> {
+    public post(url: string, data?: unknown, config?: ApiRequestConfig): Promise<AxiosResponse<any>> {
         return this.httpService.post(url, data, config);
     }
 
@@ -117,11 +117,11 @@ export class ApiService {
         return this.httpService.get(url, config);
     }
 
-    public put(url: string, data?: any, config?: ApiRequestConfig): Promise<AxiosResponse<any>> {
+    public put(url: string, data?: unknown, config?: ApiRequestConfig): Promise<AxiosResponse<any>> {
         return this.httpService.put(url, data, config);
     }
 
-    public patch(url: string, data?: any, config?: ApiRequestConfig): Promise<AxiosResponse<any>> {
+    public patch(url: string, data?: unknown, config?: ApiRequestConfig): Promise<AxiosResponse<any>> {
         return this.httpService.patch(url, data, config);
     }
 
@@ -129,7 +129,7 @@ export class ApiService {
         return this.httpService.delete(url, config);
     }
 
-    public downloadFile(response: AxiosResponse) {
+    public downloadFile(response: AxiosResponse): void {
         if (response && response.headers) {
             let filename = "";
             let disposition = response.headers['content-disposition'];

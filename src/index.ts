@@ -72,11 +72,23 @@ export type Thread = thread;
 export type Topic = topic;
 export type Post = post;
 
-import { SearchEntityResponse as searchEntityResponse, SearchItem as searchItem, SearchParameters as searchParameters, SearchRequest as searchRequest } from './models/Search'
+import { SearchEntityResponse as searchEntityResponse, SearchEntityRequest as searchEntityRequest, SearchItem as searchItem, SearchParameters as searchParameters, SearchRequest as searchRequest, SearchCount as searchCount, FacetValue as facetValue, SearchFacetValue as searchFacetValue, SearchFacetItem as searchFacetItem, Facet as facet, SearchFacets as searchFacets, SearchGroupItem as searchGroupoItem, SearchGroups as searchGroups, SearchTypeItem as searchTypeItem, SearchTypes as searchTypes } from './models/Search'
 export type SearchEntityResponse = searchEntityResponse;
 export type SearchItem = searchItem;
 export type SearchParameters = searchParameters;
 export type SearchRequest = searchRequest;
+export type SearchEntityRequest = searchEntityRequest;
+export type SearchCount = searchCount;
+export type SearchFacetItem = searchFacetItem;
+export type SearchFacetValue = searchFacetValue;
+export type FacetValue = facetValue;
+export type Facet = facet;
+export type SearchGroupItem = searchGroupoItem;
+export type SearchGroups = searchGroups;
+export type SearchTypes = searchTypes;
+export type SearchTypeItem = searchTypeItem;
+export type SearchFacets = searchFacets;
+
 
 import { Licence as licence } from './models/Lic'
 export type Licence = licence;

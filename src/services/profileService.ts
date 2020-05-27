@@ -188,7 +188,7 @@ export class ProfileService {
         return false;
     }
 
-    public clearUserProfile() {
+    public clearUserProfile(): void {
         if (this.store && this.store.me) {
             this.store.me = undefined;
             this.store.roles = undefined;

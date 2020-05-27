@@ -48,7 +48,7 @@ export class ChatService {
         this.httpService = Axios.create();
     }
 
-    public async init() {
+    public async init(): Promise<void> {
         if (this.options.emojiPath) {
             this.apiService.get(this.options.emojiPath, {
                 baseURL: "/"
@@ -104,7 +104,7 @@ export class ChatService {
         }
     }
 
-    public markChannelRefreshed(channelKey: string) {
+    public markChannelRefreshed(channelKey: string): void {
         if (this.store.channels[channelKey]) {
             this.store.channels[channelKey].newMessages = false;
         }

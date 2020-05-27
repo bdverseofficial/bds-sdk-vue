@@ -28,7 +28,7 @@ export class CsService {
         this.options = { ...this.options, ...options };
     }
 
-    public async init() {
+    public async init(): Promise<void> {
         if (this.configService.configuration) {
             let configCs = this.configService.configuration.cs;
             if (configCs) {
@@ -37,11 +37,11 @@ export class CsService {
         }
     }
 
-    public async initUser() {
+    public async initUser(): Promise<void> {
         await this.refreshCart();
     }
 
-    public async refreshCart() {
+    public async refreshCart(): Promise<void> {
         this.store.cart = (await this.getCartApi()) || undefined;
     }
 
@@ -55,15 +55,15 @@ export class CsService {
         return null;
     }
 
-    public async removeLineFromCart(lineNumber: string) {
+    public async removeLineFromCart(lineNumber: string): Promise<void> {
         this.store.cart = (await this.removeLineFromCartApi(lineNumber)) || undefined;
     }
 
-    public async addLineToCart(productOffersKey: string, quantity: number, offerId?: string) {
+    public async addLineToCart(productOffersKey: string, quantity: number, offerId?: string): Promise<void> {
         this.store.cart = (await this.addLineToCartApi(productOffersKey, quantity, offerId)) || undefined;
     }
 
-    public async updateLineFromCart(lineNumber: string, newQuantity: number) {
+    public async updateLineFromCart(lineNumber: string, newQuantity: number): Promise<void> {
         this.store.cart = (await this.updateLineFromCartApi(lineNumber, newQuantity)) || undefined;
     }
 

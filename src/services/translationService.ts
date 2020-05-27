@@ -33,7 +33,7 @@ export class TranslationService {
         });
     }
 
-    public async init() {
+    public async init(): Promise<void> {
         let config = this.configService.configuration;
         this.options.locale = (this.options.locale || config?.defaultLocale) || DEFAULTLOCALE;
         this.options.fallbackLocale = (this.options.fallbackLocale || config?.defaultLocale) || DEFAULTLOCALE;

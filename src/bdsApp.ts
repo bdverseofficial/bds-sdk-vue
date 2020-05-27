@@ -131,7 +131,7 @@ export class BdsApp {
         this.title = options.title;
     }
 
-    public start(mainVue: Vue) {
+    public start(mainVue: Vue): void {
         this.mainVue = mainVue;
     }
 
@@ -200,7 +200,7 @@ export class BdsApp {
         return lang!;
     }
 
-    public async init() {
+    public async init(): Promise<void> {
         await this.configService.init();
         await this.translationService.init();
         await this.apiService.init();

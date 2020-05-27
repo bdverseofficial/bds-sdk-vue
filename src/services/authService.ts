@@ -214,7 +214,7 @@ export class AuthService {
         }
     }
 
-    public async createTokenExternalProviderToken(provider: string, token: string, signOut: () => Promise<void>) {
+    public async createTokenExternalProviderToken(provider: string, token: string, signOut: () => Promise<void>): Promise<void> {
         try {
             let request = {
                 token: token,
