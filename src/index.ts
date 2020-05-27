@@ -8,6 +8,9 @@ export { ConfigService } from './services/configService';
 export type ConfigOptions = configOptions;
 export type Configuration = configuration;
 
+import { EnumValue as enumValue } from './models/Enum';
+export type EnumValue = enumValue;
+
 import { AuthOptions as authOptions, Challenge as challenge, ChallengeMethod as challengeMethod, UserRequest as userRequest, SendActivationRequest as sendActivationRequest, ChallengeRequest as challengeRequest, LoginRequest as loginRequest, NewChallengeRequest as newChallengeRequest, ResetPasswordRequest as resetPasswordRequest, ForgotPasswordRequest as forgotPasswordRequest } from './services/authService';
 export { AuthService } from './services/authService';
 export type AuthOptions = authOptions;
