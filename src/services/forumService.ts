@@ -114,7 +114,7 @@ export class ForumService {
         return await this.searchForumApi(request, options);
     }
 
-    private async searchForumApi(request: any, options?: ApiRequestConfig): Promise<SearchEntityResponse | null> {
+    private async searchForumApi(request: SearchEntityRequest, options?: ApiRequestConfig): Promise<SearchEntityResponse | null> {
         if (request) {
             if (this.configService.configuration) {
                 let response = await this.apiService.post(

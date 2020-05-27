@@ -1,7 +1,7 @@
 import { Cart, Order, ProductOffersResponse, Review, B2CCustomer } from '../models/Cs';
 import { ApiService, ApiRequestConfig } from './apiService';
 import { ConfigService } from './configService';
-import { SearchEntityResponse, SearchRequest } from '../models/Search';
+import { SearchEntityResponse, SearchRequest, SearchEntityRequest } from '../models/Search';
 
 export interface CsOptions {
     priceBookKey?: string;
@@ -81,7 +81,7 @@ export class CsService {
         return await this.getProductOffersReviewsApi(productOffersKey, limit, scrollId);
     }
 
-    public async searchCatalog(request: SearchRequest): Promise<SearchEntityResponse | null> {
+    public async searchCatalog(request: SearchEntityRequest): Promise<SearchEntityResponse | null> {
         let options = {
             headers: {
                 Filters: [
