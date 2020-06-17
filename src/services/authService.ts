@@ -15,6 +15,7 @@ export interface Token {
     access_token?: string;
     identityProvider?: string;
     device_token?: string;
+    expires_in?: number;
 }
 
 export interface ChallengeMethod {
@@ -114,11 +115,7 @@ export class AuthService {
         this.configService = configService;
         this.token = undefined;
         this.rememberMe = false;
-        if (options) {
-            this.options.signInCompleted = options.signInCompleted || this.options.signInCompleted;
-            this.options.signOutCompleted = options.signOutCompleted || this.options.signOutCompleted;
-            this.options.refreshOnInit = options.refreshOnInit || this.options.refreshOnInit;
-        }
+        this.options = { ...this.options, ...options };
     }
 
     private tryParseToken(token?: string): Token | undefined {
@@ -149,14 +146,14 @@ export class AuthService {
         }
     }
 
-    public async signOut(keepStorage: boolean): Promise<void> {
+    public async signOut(keepStorage: boolean, soft?: boolean): Promise<void> {
         this.token = undefined;
         if (this.refreshTimeout) window.clearTimeout(this.refreshTimeout);
         if (!keepStorage) {
             localStorage.removeItem('refresh_token');
             sessionStorage.removeItem('refresh_token');
         }
-        if (this.externalSignOut) {
+        if (soft && this.externalSignOut) {
             await this.externalSignOut();
         }
         if (this.store!.isAuthenticated) {
@@ -173,7 +170,7 @@ export class AuthService {
         if (deviceToken) {
             request.deviceToken = deviceToken;
         }
-        this.token = await this.signInApi(request, options);
+        this.token = (await this.signInApi(request, options))!;
         this.store.isAuthenticated = this.token ? true : false;
         this.saveToken();
         this.scheduleRefreshToken();
@@ -185,7 +182,10 @@ export class AuthService {
             window.clearTimeout(this.refreshTimeout);
             this.refreshTimeout = undefined;
         }
-        let timeSpan = this.configService.configuration!.refreshTokenTimeSpanSecond || 30000;
+        let timeSpan = 30000;
+        if (this.token && this.token.expires_in) {
+            timeSpan = (this.token.expires_in / 2) * 1000;
+        }
         this.refreshTimeout = window.setTimeout(async () => { await this.refreshToken(); }, timeSpan);
     }
 
@@ -199,16 +199,22 @@ export class AuthService {
             if (deviceToken) {
                 request.deviceToken = deviceToken;
             }
-            this.token = await this.refreshTokenApi(request);
+            this.token = (await this.refreshTokenApi(request))!;
             this.store!.isAuthenticated = this.token ? true : false;
             this.saveToken();
             this.scheduleRefreshToken();
-        } catch {
-            await this.signOut(true);
+        } catch (e) {
+            let code = e.underlyingError ? e.underlyingError.response.status : e.errorCode;
+            if (code === 401 || code === 403) {
+                await this.signOut(true, true);
+            }
+            else {
+                this.scheduleRefreshToken();
+            }
         }
     }
 
-    public async createTokenExternalProviderToken(provider: string, token: string, signOut: () => Promise<void>) {
+    public async createTokenExternalProviderToken(provider: string, token: string, signOut: () => Promise<void>): Promise<void> {
         try {
             let request = {
                 token: token,
@@ -219,13 +225,13 @@ export class AuthService {
             if (deviceToken) {
                 request.deviceToken = deviceToken;
             }
-            this.token = await this.createTokenExternalProviderTokenApi(request);
+            this.token = (await this.createTokenExternalProviderTokenApi(request))!;
             this.store!.isAuthenticated = this.token ? true : false;
             this.saveToken();
             this.scheduleRefreshToken();
             if (this.options.signInCompleted) await this.options.signInCompleted!();
         } catch {
-            await this.signOut(true);
+            await this.signOut(true, true);
         }
     }
 
@@ -238,15 +244,15 @@ export class AuthService {
         if (deviceToken) {
             request.deviceToken = deviceToken;
         }
-        this.token = await this.signInFromExternalProviderApi(request);
+        this.token = (await this.signInFromExternalProviderApi(request))!;
         this.store!.isAuthenticated = this.token ? true : false;
         if (this.options.signInCompleted) await this.options.signInCompleted!();
     }
 
     public async init(): Promise<void> {
-        this.challengeMethods = (await this.getChallengeMethods())!;
+        this.getChallengeMethods().then((value) => { this.challengeMethods = value!; }, (value) => { this.challengeMethods = [] }).catch(() => { });
         if (this.options.refreshOnInit) {
-            await this.TryAutoAuth();
+            this.TryAutoAuth().catch(() => { });
         }
     }
 
@@ -261,10 +267,16 @@ export class AuthService {
 
     public getHeaders(): any {
         let headers: any = {};
-        if (this.configService.configuration!.apiToken) {
-            headers['ApiToken'] = this.configService.configuration!.apiToken;
+        if (this.configService.configuration?.apiToken) {
+            headers['ApiToken'] = this.configService.configuration.apiToken;
         }
         return headers;
+    }
+
+    public getAccessToken(): string | undefined {
+        if (this.token) {
+            return this.token.access_token;
+        }
     }
 
     public getAuthHeaders(): any {
@@ -276,60 +288,52 @@ export class AuthService {
         return undefined;
     }
 
-    public async getChallengeCode(request: NewChallengeRequest, options?: ApiRequestConfig): Promise<Challenge | undefined> {
+    public async getChallengeCode(request: NewChallengeRequest, options?: ApiRequestConfig): Promise<Challenge | null> {
         if (this.configService.configuration) {
             request.typeName = request.typeName || this.configService.configuration.userTypeName;
         }
         if (request.typeName) {
             let response = await this.apiService!.post('api/bds/v1/users/challengecode', request, options);
-            if (response.data) {
-                return response.data as Challenge;
-            }
+            return response.data;
         }
-        return undefined;
+        return null;
     }
 
-    private async signInApi(request: LoginRequest, options?: ApiRequestConfig): Promise<Token | undefined> {
+    private async signInApi(request: LoginRequest, options?: ApiRequestConfig): Promise<Token | null> {
         if (this.configService.configuration) {
             request.typeName = request.typeName || this.configService.configuration.userTypeName;
         }
         if (request.typeName) {
             let response = await this.apiService!.post('api/bds/v1/users/signin', request, options);
-            if (response.data) {
-                return response.data.token as Token;
-            }
+            return response.data;
         }
-        return undefined;
+        return null;
     }
 
-    public async getChallengeMethods(options?: ApiRequestConfig): Promise<ChallengeMethod[] | undefined> {
+    public async getChallengeMethods(options?: ApiRequestConfig): Promise<ChallengeMethod[] | null> {
         let response = await this.apiService!.get('api/bds/v1/users/challengemethods', options);
         return response.data;
     }
 
-    public async sendActivation(request: SendActivationRequest, options?: ApiRequestConfig): Promise<any> {
+    public async sendActivation(request: SendActivationRequest, options?: ApiRequestConfig): Promise<void> {
         if (this.configService.configuration) {
             request.typeName = request.typeName || this.configService.configuration.userTypeName;
         }
         if (request.typeName) {
-            let response = await this.apiService!.post('api/bds/v1/users/sendactivation', request, options);
-            return response.data;
+            await this.apiService!.post('api/bds/v1/users/sendactivation', request, options);
         }
-        return undefined;
     }
 
-    public async forgotPassword(request: ForgotPasswordRequest, options?: ApiRequestConfig): Promise<any> {
+    public async forgotPassword(request: ForgotPasswordRequest, options?: ApiRequestConfig): Promise<void> {
         if (this.configService.configuration) {
             request.typeName = request.typeName || this.configService.configuration.userTypeName;
         }
         if (request.typeName) {
-            let response = await this.apiService!.post('api/bds/v1/users/forgotpassword', request, options);
-            return response.data;
+            await this.apiService!.post('api/bds/v1/users/forgotpassword', request, options);
         }
-        return undefined;
     }
 
-    public async validateCommunicationToken(token: string, options?: ApiRequestConfig): Promise<User | undefined> {
+    public async validateCommunicationToken(token: string, options?: ApiRequestConfig): Promise<User | null> {
         let request = {
             token: token,
         };
@@ -337,7 +341,7 @@ export class AuthService {
         return response.data;
     }
 
-    public async activation(token: string, options?: ApiRequestConfig): Promise<User | undefined> {
+    public async activation(token: string, options?: ApiRequestConfig): Promise<User | null> {
         let request = {
             token: token,
         };
@@ -346,7 +350,7 @@ export class AuthService {
     }
 
 
-    public async resetPassword(request: ResetPasswordRequest, options?: ApiRequestConfig): Promise<User | undefined> {
+    public async resetPassword(request: ResetPasswordRequest, options?: ApiRequestConfig): Promise<User | null> {
         if (this.configService.configuration && request.login) {
             request.login.typeName = request.login.typeName || this.configService.configuration.userTypeName;
         }
@@ -354,34 +358,24 @@ export class AuthService {
         return response.data;
     }
 
-    private async refreshTokenApi(request: RefreshTokenRequest, options?: ApiRequestConfig): Promise<Token | undefined> {
-        let newToken: Token | undefined;
+    private async refreshTokenApi(request: RefreshTokenRequest, options?: ApiRequestConfig): Promise<Token | null> {
         const response = await this.apiService!.post('api/bds/v1/users/token', request, { withCredentials: false, silentError: true, ...options });
-        if (response.data) {
-            newToken = response.data as Token;
-        }
-        return newToken;
+        return response.data;
     }
 
-    private async createTokenExternalProviderTokenApi(request: ExternalTokenRequest, options?: ApiRequestConfig): Promise<Token | undefined> {
-        let newToken: Token | undefined;
+    private async createTokenExternalProviderTokenApi(request: ExternalTokenRequest, options?: ApiRequestConfig): Promise<Token | null> {
         if (this.configService.configuration) {
             request.typeName = request.typeName || this.configService.configuration.userTypeName;
         }
         const response = await this.apiService!.post('api/bds/v1/users/externaltoken', request, { withCredentials: false, silentError: true, ...options });
-        if (response.data) {
-            newToken = response.data as Token;
-        }
-        return newToken;
+        return response.data;
     }
 
-    private async signInFromExternalProviderApi(request: ExternalTokenRequest, options?: ApiRequestConfig): Promise<Token | undefined> {
+    private async signInFromExternalProviderApi(request: ExternalTokenRequest, options?: ApiRequestConfig): Promise<Token | null> {
         if (this.configService.configuration) {
             request.typeName = request.typeName || this.configService.configuration.userTypeName;
         }
         const response = await this.apiService!.post('api/bds/v1/users/externalsignIn', request, { withCredentials: false, silentError: true, ...options });
-        if (response.data) {
-            return response.data as Token;
-        }
+        return response.data;
     }
 }

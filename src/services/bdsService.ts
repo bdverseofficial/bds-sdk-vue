@@ -27,9 +27,10 @@ export class BdsService {
     };
 
     public async init(): Promise<void> {
-        let configs = await this.getConfig();
-        this.configService.configuration = { ...this.configService.configuration, ...configs };
-        this.store.countries = (await this.getCountries())!;
+        this.getConfig().then((configs) => {
+            this.configService.configuration = { ...this.configService.configuration, ...configs };
+        }, () => { }).catch(() => { });
+        this.getCountries().then((value) => { this.store.countries = value! }, (value) => { this.store.countries = [] }).catch(() => { });
     }
 
     public toReferenceOrDefault(entity: BdsEntity): Reference | null {

@@ -3,20 +3,13 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-  batch: true
-  branches:
-    include:
-    - develop
-  paths:
-    include:
-    - src/*
+  batch: true  
 
 pool: 'David'
 
 parameters:
 - name: releaseTag # name of the parameter; required
-  type: string # data type of the parameter; required
-  default: $(Build.SourceBranchName)
+  type: string # data type of the parameter; required  
 
 variables:
   seed: 2
@@ -33,11 +26,11 @@ steps:
       $v = [string](Get-Content package.json | ConvertFrom-Json).version
       if ('$(releaseTag)' -eq '')
       {
-        Write-Host "##vso[build.updatebuildnumber]$v"
+          Write-Host "##vso[build.updatebuildnumber]$v"
       }
       else
       {
-        Write-Host "##vso[build.updatebuildnumber]$v-$(releaseTag).$(buildCounter)"
+          Write-Host "##vso[build.updatebuildnumber]$v-$(releaseTag)"
       }
 
 - task: CmdLine@2
@@ -56,7 +49,15 @@ steps:
     targetType: 'inline'
     script: |
       $json = Get-Content package.json | ConvertFrom-Json
-      $json.version = "$($json.version)-$(releaseTag).$(buildCounter)"
+      if ('$(releaseTag)' -eq '')
+      {
+          Write-Host "##vso[build.updatebuildnumber]$v"
+          $json.version = "$($json.version)"
+      }
+      else
+      {          
+          $json.version = "$($json.version)-$(releaseTag)"
+      }      
       (ConvertTo-Json $json) > package.json
 
 - task: Npm@1

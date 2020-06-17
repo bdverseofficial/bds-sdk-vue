@@ -1,13 +1,16 @@
 import axios from 'axios';
+import { CmsOptions } from './cmsService';
+import { CsOptions } from './csService';
 
 export interface Configuration {
     appId?: string;
     serverUrl?: string;
     apiToken?: string;
-    refreshTokenTimeSpanSecond?: number;
     defaultLocale?: string;
     supportedLocale?: string[];
     userTypeName?: string;
+    cms?: CmsOptions;
+    cs?: CsOptions;
 }
 
 export interface ConfigOptions {
@@ -24,16 +27,12 @@ export class ConfigService {
     public configuration?: Configuration;
 
     constructor(options?: ConfigOptions) {
-        if (options) {
-            this.options.configPath = options.configPath || this.options.configPath;
-            this.options.configuration = options.configuration || this.options.configuration;
-        }
+        this.options = { ...this.options, ...options };
     }
 
-    public async init() {
+    public async init(): Promise<void> {
         if (!this.options.configuration) {
-            let response = await axios.create().get(this.options.configPath!);
-            this.configuration = response.data;
+            await axios.create().get(this.options.configPath!).then((response) => { this.configuration = response.data });
         }
     }
 }

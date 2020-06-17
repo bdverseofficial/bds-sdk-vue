@@ -14,11 +14,13 @@ export interface RouterOptions {
     page404?: string;
     loginPage?: string;
     otherRoute?: RouteConfig;
+    onBeforeEach?: (to: Route, from: Route) => Promise<void>;
+    onAfterEach?: (route: Route) => Promise<void>;
 }
 
 interface InitialRoute {
     to: Route;
-    from: RouteRecord;
+    from: Route;
     next: (to?: RawLocation | false | ((vm: Vue) => any) | void) => void;
 }
 
@@ -44,14 +46,7 @@ export class RouterService {
         this.profileService = profileService;
         this.pause = false;
 
-        if (options) {
-            this.options.routes = options.routes || this.options.routes;
-            this.options.homePage = options.homePage || this.options.homePage;
-            this.options.loginPage = options.loginPage || this.options.loginPage;
-            this.options.page404 = options.page404 || this.options.page404;
-            this.options.otherRoute = options.otherRoute || this.options.otherRoute;
-            this.options.baseUrl = options.baseUrl || this.options.baseUrl;
-        }
+        this.options = { ...this.options, ...options };
         this.options.routes = [...this.options.routes!, this.options.otherRoute!];
         this.injectProps(this.options.routes);
         this.router = new VueRouter({
@@ -63,52 +58,57 @@ export class RouterService {
                         selector: to.hash,
                     };
                 }
+                if (savedPosition) {
+                    return savedPosition
+                } else {
+                    return { x: 0, y: 0 }
+                }
             },
             routes: this.options.routes,
         });
-        this.router.beforeEach((to, from, next) => {
+        this.router.beforeEach(async (to, from, next) => {
             if (this.escapeRoute(to)) {
-                next({ name: to.name, hash: to.hash, params: to.params, query: to.query, path: to.path });
+                next({ name: to.name!, hash: to.hash, params: to.params, query: to.query!, path: to.path });
             }
-            let route = to.matched.find(e => e.meta.auth);
-            if (route) {
-                this.manageAuthGuard({ to: to, from: route, next: next });
-            } else next();
+            await this.manageAuthGuard({ to: to, from: from, next: next });
+        });
+        this.router.afterEach(async (to, from) => {
+            if (this.options.onAfterEach) await this.options.onAfterEach(this.router.currentRoute);
         });
     }
 
-    public home() {
+    public home(): void {
         this.push(this.options.homePage!);
     }
 
-    public push(route: RawLocation) {
+    public push(route: RawLocation): void {
         if (!route) route = this.options.homePage!;
         this.router.push(route);
     }
 
-    public updateQuery(query: Dictionary<string | (string | null)[] | null | undefined>) {
+    public updateQuery(query: Dictionary<string | (string | null)[] | null | undefined>): void {
         this.replace({ query: query });
     }
 
-    public updateParams(params: Dictionary<string>) {
+    public updateParams(params: Dictionary<string>): void {
         this.replace({ params: params });
     }
 
-    public login(url?: string) {
+    public login(url?: string): void {
         url = url || this.options.homePage;
         this.replace({ path: this.options.loginPage, query: { url: url } });
     }
 
-    public replace(route?: RawLocation) {
+    public replace(route?: RawLocation): void {
         route = route || this.options.homePage;
         this.router.replace(route!);
     }
 
-    public back() {
+    public back(): void {
         this.router.back();
     }
 
-    public resume() {
+    public resume(): void {
         this.pause = false;
         if (this.initialRoute) {
             this.manageAuthGuard({ to: this.initialRoute.to, from: this.initialRoute.route, next: this.initialRoute.next });
@@ -116,34 +116,53 @@ export class RouterService {
         }
     }
 
-    public redirectToLoginIfNeeded() {
-        if (this.router && this.router.currentRoute && this.router.currentRoute.meta) {
-            let auth = this.router.currentRoute.meta.auth;
-            if (auth && this.authService) {
-                if (!this.authService.store.isAuthenticated) {
-                    this.login(this.router.currentRoute.fullPath);
+    public redirectToLoginIfNeeded(): void {
+        if (this.router && this.router.currentRoute) {
+            let meta = this.getMeta(this.router.currentRoute);
+            if (meta) {
+                let auth = meta.auth;
+                if (auth) {
+                    this.home();
                 }
             }
         }
     }
 
-    private manageAuthGuard(initialRoute: InitialRoute) {
+    private getMeta(to: Route): any {
+        if (to && to.matched) {
+            let meta = to.matched.reduce((total: any, route: RouteRecord) => {
+                if (!total && !route.meta) return null;
+                if (!total) return route.meta;
+                if (!route.meta) return total;
+                return { ...total, ...route.meta };
+            }, null);
+            return meta;
+        }
+        return null;
+    }
+
+    private async manageAuthGuard(initialRoute: InitialRoute): Promise<void> {
         if (!this.pause) {
-            if (initialRoute.from && initialRoute.from.meta) {
-                let auth = initialRoute.from.meta.auth;
-                let roles = initialRoute.from.meta.roles;
-                if (auth && this.authService) {
-                    if (!this.authService.store.isAuthenticated) {
-                        initialRoute.next({ path: this.options.loginPage, query: { url: initialRoute.to.fullPath } });
-                        return;
-                    }
-                    if (roles) {
-                        if (!this.profileService.isInOneOfRoles(roles)) {
-                            initialRoute.next({ path: this.options.homePage });
+            if (initialRoute.to && initialRoute.to.matched) {
+                let meta = this.getMeta(initialRoute.to);
+                if (meta) {
+                    let auth = meta.auth;
+                    let roles = meta.roles;
+                    if (auth && this.authService) {
+                        if (!this.authService.store.isAuthenticated) {
+                            initialRoute.next({ path: this.options.loginPage, query: { url: initialRoute.to.fullPath } });
+                            return;
+                        }
+                        if (roles) {
+                            if (!this.profileService.isInOneOfRoles(roles)) {
+                                initialRoute.next({ path: this.options.loginPage, query: { url: initialRoute.to.fullPath } });
+                                return;
+                            }
                         }
                     }
                 }
             }
+            if (this.options.onBeforeEach) await this.options.onBeforeEach(initialRoute.to, initialRoute.from);
             initialRoute.next();
         } else {
             if (!this.initialRoute) {
@@ -152,7 +171,7 @@ export class RouterService {
         }
     }
 
-    private injectProps(routes: RouteConfig[]) {
+    private injectProps(routes: RouteConfig[]): void {
         if (routes) {
             routes.forEach((r) => {
                 if (!r.props) r.props = (route) => this.unEscapeRouteParams(route);
@@ -163,7 +182,7 @@ export class RouterService {
         }
     }
 
-    private escapeRoute(route: Route) {
+    private escapeRoute(route: Route): boolean {
         let changed = false;
         if (route.params) {
             for (let paramKey in route.params) {
@@ -184,7 +203,7 @@ export class RouterService {
         return changed;
     }
 
-    private unEscapeRouteParams(route: Route) {
+    private unEscapeRouteParams(route: Route): any {
         let params: any = {};
         if (route.params) {
             for (let paramKey in route.params) {
@@ -201,14 +220,14 @@ export class RouterService {
         return params;
     }
 
-    private escapeUrlParameters(fragment: any) {
+    private escapeUrlParameters(fragment: any): any {
         if (fragment && typeof fragment === 'string') {
             // fragment = fragment.replace(/\./g, '_dot_');
         }
         return fragment;
     }
 
-    private unEscapeUrlParameters(fragment: any) {
+    private unEscapeUrlParameters(fragment: any): any {
         if (fragment && typeof fragment === 'string') {
             // fragment = fragment.replace(/_dot_/g, '.');
         }

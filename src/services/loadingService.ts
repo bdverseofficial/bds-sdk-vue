@@ -1,10 +1,10 @@
 export class LoadingService {
 
-    public loadingStart(config: any) { }
+    public loadingStart(config: unknown): void { }
 
-    public loadingEnd(config: any) { }
+    public loadingEnd(config: unknown): void { }
 
-    public async usingLoading(context: any, promise: () => Promise<void>) {
+    public async usingLoading(context: unknown, promise: () => Promise<void>): Promise<void> {
         this.loadingStart(context);
         try {
             await promise();
