@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { CmsOptions } from './cmsService';
 import { CsOptions } from './csService';
+import { ServerLicence } from '../models/Lic';
 
 export interface Configuration {
     appId?: string;
@@ -11,6 +12,9 @@ export interface Configuration {
     userTypeName?: string;
     cms?: CmsOptions;
     cs?: CsOptions;
+    farm?: string;
+    serverVersion?: string;
+    serverLicence?: ServerLicence;
 }
 
 export interface ConfigOptions {

@@ -129,6 +129,9 @@ export class BdsApp {
         this.bdsService = new BdsService(this.configService, this.apiService, options.bds);
 
         this.title = options.title;
+        if (this.title) {
+            window.document.title = this.title;
+        }
     }
 
     public start(mainVue: Vue): void {

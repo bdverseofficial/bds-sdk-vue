@@ -94,8 +94,9 @@ export type SearchTypeItem = searchTypeItem;
 export type SearchFacets = searchFacets;
 
 
-import { Licence as licence } from './models/Lic'
+import { Licence as licence, ServerLicence as serverLicence } from './models/Lic'
 export type Licence = licence;
+export type ServerLicence = serverLicence;
 
 import { B2CCustomer as b2CCustomer, Cart as cart, CartLine as cartLine, Offer as offer, Order as order, Product as product, ProductAsset as productAsset, ProductOffers as productOffers, ProductOffersResponse as productOffersResponse, ProductQuantity as productQuantity, Review as review } from './models/Cs'
 export type B2CCustomer = b2CCustomer;

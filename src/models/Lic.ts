@@ -9,3 +9,9 @@ export interface Licence extends BdsEntity {
     status?: string;
     statusMessage?: string;
 }
+
+export interface ServerLicence {
+    isTrial?: boolean;
+    isLimited?: boolean;
+    status?: string;
+}
